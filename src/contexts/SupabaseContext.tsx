@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
 interface SupabaseContextType {
   user: User | null
@@ -23,6 +23,12 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }) 
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // If Supabase is not configured, don't try to authenticate
+    if (!isSupabaseConfigured || !supabase) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -43,7 +49,9 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }) 
   }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    if (supabase) {
+      await supabase.auth.signOut()
+    }
   }
 
   const value = {

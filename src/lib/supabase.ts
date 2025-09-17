@@ -3,11 +3,20 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+// Check for missing environment variables and provide helpful error
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey)
+
+if (!isSupabaseConfigured) {
+  console.error('Missing Supabase environment variables. Check configuration:', {
+    'VITE_SUPABASE_URL is set': !!supabaseUrl,
+    'VITE_SUPABASE_ANON_KEY is set': !!supabaseAnonKey
+  })
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Only create client if properly configured
+export const supabase = isSupabaseConfigured 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 // Database types for TypeScript (we'll expand this as we build our schema)
 export interface Player {
