@@ -1,34 +1,51 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import Header from './components/Header'
+import Navigation from './components/Navigation'
+import Dashboard from './components/Dashboard'
+import Teams from './components/Teams'
+import Players from './components/Players'
+import Bouts from './components/Bouts'
+import { Auth } from './components/Auth'
+import { useAuth } from './hooks/useAuth'
+import { Analytics } from "@vercel/analytics/react"
+
+
+type ActiveView = 'dashboard' | 'players' | 'bouts' | 'teams' | 'settings'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activeView, setActiveView] = useState<ActiveView>('dashboard')
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner">
+          <h2>Loading Derby Stat Tracker...</h2>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Auth onAuthSuccess={() => { }} />
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app">
+      <Header />
+      <div className="app-container">
+        <Navigation activeView={activeView} onViewChange={setActiveView} />
+        <main className="main-content">
+          {activeView === 'dashboard' && <Dashboard />}
+          {activeView === 'players' && <Players />}
+          {activeView === 'bouts' && <Bouts />}
+          {activeView === 'teams' && <Teams />}
+          {activeView === 'settings' && <div className="view-placeholder">Settings - Coming Soon</div>}
+          <Analytics />
+        </main>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
