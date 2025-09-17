@@ -47,7 +47,13 @@ A modern web application for tracking roller derby statistics, built with React,
    - Run the SQL schema from `database/schema.sql` in your Supabase SQL editor
 
 4. **Configure environment variables**
-   - Copy `.env.local` and update with your Supabase credentials:
+   - Copy `.env.example` to `.env.local` and update with your Supabase credentials:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Then edit `.env.local` with your actual values:
 
    ```env
    VITE_SUPABASE_URL=your_supabase_project_url
@@ -86,7 +92,7 @@ See `database/schema.sql` for the complete database structure.
 
 ### Project Structure
 
-```
+```text
 src/
 ├── components/          # React components
 ├── hooks/              # Custom React hooks
@@ -97,12 +103,61 @@ src/
 
 ## Deployment
 
-This project is configured for easy deployment on Vercel:
+### Environment Variables for Production
 
-1. Push your code to GitHub
-2. Connect your repo to Vercel
-3. Add your environment variables in Vercel dashboard
-4. Deploy!
+⚠️ **Important**: Never commit `.env.local` to your repository! It contains secrets.
+
+For production deployment, you need to set these environment variables in your hosting platform:
+
+- `VITE_SUPABASE_URL` - Your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+
+### Vercel Deployment
+
+1. **Push your code to GitHub** (without `.env.local`)
+
+2. **Connect to Vercel**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+
+3. **Add Environment Variables**
+   - In Vercel dashboard: Project Settings > Environment Variables
+   - Add:
+
+     ```env
+     VITE_SUPABASE_URL = your_supabase_project_url
+     VITE_SUPABASE_ANON_KEY = your_supabase_anon_key
+     ```
+
+4. **Deploy!** - Vercel will automatically build and deploy
+
+### Netlify Deployment
+
+1. **Push to GitHub** (without `.env.local`)
+
+2. **Connect to Netlify**
+   - Go to [netlify.com](https://netlify.com)
+   - Connect your GitHub repository
+
+3. **Add Environment Variables**
+   - In Netlify dashboard: Site Settings > Environment Variables
+   - Add the same variables as above
+
+4. **Build Settings**
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+
+### Other Platforms
+
+For other hosting platforms (Cloudflare Pages, Firebase, etc.), the process is similar:
+
+1. Connect your GitHub repository
+2. Set the environment variables in the platform's dashboard
+3. Configure build command as `npm run build` with output directory `dist`
+
+### Error Handling
+
+If environment variables are missing in production, users will see a friendly configuration error page instead of a broken app.
 
 ## Contributing
 
