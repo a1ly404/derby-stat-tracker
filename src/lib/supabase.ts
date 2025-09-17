@@ -13,10 +13,18 @@ if (!isSupabaseConfigured) {
   })
 }
 
-// Only create client if properly configured
+// Export the client - will be null if not configured, components should check isSupabaseConfigured
 export const supabase = isSupabaseConfigured 
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
+
+// Helper function for components that require supabase to be configured
+export function requireSupabase() {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Please check your environment variables.')
+  }
+  return supabase
+}
 
 // Database types for TypeScript (we'll expand this as we build our schema)
 export interface Player {

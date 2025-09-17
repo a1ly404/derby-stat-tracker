@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { requireSupabase, isSupabaseConfigured } from '../lib/supabase'
 
 interface SupabaseContextType {
   user: User | null
@@ -24,13 +24,13 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }) 
 
   useEffect(() => {
     // If Supabase is not configured, don't try to authenticate
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isSupabaseConfigured) {
       setLoading(false)
       return
     }
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    requireSupabase().auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -39,7 +39,7 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }) 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = requireSupabase().auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -49,9 +49,7 @@ export const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }) 
   }, [])
 
   const signOut = async () => {
-    if (supabase) {
-      await supabase.auth.signOut()
-    }
+    await requireSupabase().auth.signOut()
   }
 
   const value = {

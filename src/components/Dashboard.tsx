@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { requireSupabase } from '../lib/supabase'
 import type { Team } from '../lib/supabase'
 import { getStatsEmoji, getActivityEmoji } from '../utils/emojis'
 import './Dashboard.css'
@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
       setLoading(true)
 
       // Fetch teams with player counts
-      const { data: teamsData, error: teamsError } = await supabase
+      const { data: teamsData, error: teamsError } = await requireSupabase()
         .from('teams')
         .select(`
           *,
@@ -92,8 +92,8 @@ const Dashboard: React.FC = () => {
 
       // Fetch overall stats
       const [playersResult, boutsResult] = await Promise.all([
-        supabase.from('players').select('id', { count: 'exact', head: true }),
-        supabase.from('bouts').select('id', { count: 'exact', head: true })
+        requireSupabase().from('players').select('id', { count: 'exact', head: true }),
+        requireSupabase().from('bouts').select('id', { count: 'exact', head: true })
       ])
 
       // Calculate unique active players across all teams
@@ -108,13 +108,13 @@ const Dashboard: React.FC = () => {
       })
 
       // Fetch recent activity (simplified version)
-      const { data: recentPlayers } = await supabase
+      const { data: recentPlayers } = await requireSupabase()
         .from('players')
         .select('derby_name, created_at')
         .order('created_at', { ascending: false })
         .limit(5)
 
-      const { data: recentTeams } = await supabase
+      const { data: recentTeams } = await requireSupabase()
         .from('teams')
         .select('name, created_at')
         .order('created_at', { ascending: false })

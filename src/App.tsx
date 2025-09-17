@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './App.css'
 import Header from './components/Header'
 import Navigation from './components/Navigation'
@@ -9,6 +9,7 @@ import Bouts from './components/Bouts'
 import { Auth } from './components/Auth'
 import { ConfigurationError } from './components/ConfigurationError'
 import { useAuth } from './hooks/useAuth'
+import { isSupabaseConfigured } from './lib/supabase'
 import { Analytics } from "@vercel/analytics/react"
 
 
@@ -16,30 +17,13 @@ type ActiveView = 'dashboard' | 'players' | 'bouts' | 'teams' | 'settings'
 
 function App() {
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
-  const [configError, setConfigError] = useState<string | null>(null)
 
-  // Always call hooks first
+  // Always call hooks first (React hooks rules)
   const { user, loading } = useAuth()
 
-  // Check for configuration errors early
-  useEffect(() => {
-    try {
-      // Try to access environment variables
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-      if (!supabaseUrl || !supabaseAnonKey) {
-        setConfigError('Missing Supabase environment variables')
-        return
-      }
-    } catch (error) {
-      setConfigError(error instanceof Error ? error.message : 'Configuration error')
-    }
-  }, [])
-
-  // Show configuration error if detected
-  if (configError) {
-    return <ConfigurationError error={configError} />
+  // Check for configuration errors early - if Supabase is not configured, show error
+  if (!isSupabaseConfigured) {
+    return <ConfigurationError error="Missing Supabase environment variables" />
   }
 
   if (loading) {

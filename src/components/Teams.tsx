@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { requireSupabase } from '../lib/supabase'
 import type { Team } from '../lib/supabase'
 import './Teams.css'
 
@@ -18,7 +18,7 @@ const Teams: React.FC = () => {
     const fetchTeams = async () => {
         try {
             setLoading(true)
-            const { data, error } = await supabase
+            const { data, error } = await requireSupabase()
                 .from('teams')
                 .select('*')
                 .order('name')
@@ -50,7 +50,7 @@ const Teams: React.FC = () => {
         try {
             if (editingTeam) {
                 // Update existing team
-                const { error } = await supabase
+                const { error } = await requireSupabase()
                     .from('teams')
                     .update({
                         name: formData.name.trim(),
@@ -61,7 +61,7 @@ const Teams: React.FC = () => {
                 if (error) throw error
             } else {
                 // Create new team
-                const { error } = await supabase
+                const { error } = await requireSupabase()
                     .from('teams')
                     .insert({
                         name: formData.name.trim(),
@@ -88,7 +88,7 @@ const Teams: React.FC = () => {
         }
 
         try {
-            const { error } = await supabase
+            const { error } = await requireSupabase()
                 .from('teams')
                 .delete()
                 .eq('id', team.id)

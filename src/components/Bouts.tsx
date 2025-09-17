@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { requireSupabase } from '../lib/supabase'
 import type { Team } from '../lib/supabase'
 import { getBoutEmoji } from '../utils/emojis'
 import './Bouts.css'
@@ -54,7 +54,7 @@ const Bouts: React.FC = () => {
 
     const fetchBouts = async () => {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await requireSupabase()
                 .from('bouts')
                 .select(`
           *,
@@ -72,7 +72,7 @@ const Bouts: React.FC = () => {
 
     const fetchTeams = async () => {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await requireSupabase()
                 .from('teams')
                 .select('*')
                 .order('name')
@@ -134,14 +134,14 @@ const Bouts: React.FC = () => {
             }
 
             if (editingBout) {
-                const { error } = await supabase
+                const { error } = await requireSupabase()
                     .from('bouts')
                     .update(boutData)
                     .eq('id', editingBout.id)
 
                 if (error) throw error
             } else {
-                const { error } = await supabase
+                const { error } = await requireSupabase()
                     .from('bouts')
                     .insert([boutData])
 
@@ -175,7 +175,7 @@ const Bouts: React.FC = () => {
         if (!confirm('Are you sure you want to delete this bout?')) return
 
         try {
-            const { error } = await supabase
+            const { error } = await requireSupabase()
                 .from('bouts')
                 .delete()
                 .eq('id', boutId)

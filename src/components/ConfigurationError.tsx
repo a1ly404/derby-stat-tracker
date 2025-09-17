@@ -15,7 +15,7 @@ export function ConfigurationError({ error }: ConfigurationErrorProps) {
                 <details>
                     <summary>Technical Details</summary>
                     <p>Missing required environment variables for database connection:</p>
-                    <ul style={{ textAlign: 'left', marginTop: '10px' }}>
+                    <ul style={{ textAlign: 'left', marginTop: '10px', marginLeft: '20px' }}>
                         <li>VITE_SUPABASE_URL</li>
                         <li>VITE_SUPABASE_ANON_KEY</li>
                     </ul>

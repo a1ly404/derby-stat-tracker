@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { requireSupabase } from '../lib/supabase'
 import type { Player, Team } from '../lib/supabase'
 import './Players.css'
 
@@ -36,7 +36,7 @@ const Players: React.FC = () => {
             setLoading(true)
 
             // Fetch teams first
-            const { data: teamsData, error: teamsError } = await supabase
+            const { data: teamsData, error: teamsError } = await requireSupabase()
                 .from('teams')
                 .select('*')
                 .order('name')
@@ -45,7 +45,7 @@ const Players: React.FC = () => {
             setTeams(teamsData || [])
 
             // Fetch players with their team assignments
-            const { data: playersData, error: playersError } = await supabase
+            const { data: playersData, error: playersError } = await requireSupabase()
                 .from('players')
                 .select(`
           *,
@@ -111,7 +111,7 @@ const Players: React.FC = () => {
         try {
             if (editingPlayer) {
                 // Update existing player
-                const { error: playerError } = await supabase
+                const { error: playerError } = await requireSupabase()
                     .from('players')
                     .update({
                         derby_name: formData.derby_name.trim(),
@@ -122,7 +122,7 @@ const Players: React.FC = () => {
                 if (playerError) throw playerError
 
                 // Delete existing team assignments
-                const { error: deleteError } = await supabase
+                const { error: deleteError } = await requireSupabase()
                     .from('player_teams')
                     .delete()
                     .eq('player_id', editingPlayer.id)
@@ -130,7 +130,7 @@ const Players: React.FC = () => {
                 if (deleteError) throw deleteError
 
                 // Insert new team assignments
-                const { error: insertError } = await supabase
+                const { error: insertError } = await requireSupabase()
                     .from('player_teams')
                     .insert(
                         formData.selectedTeams.map(team => ({
@@ -145,7 +145,7 @@ const Players: React.FC = () => {
                 if (insertError) throw insertError
             } else {
                 // Create new player
-                const { data: playerData, error: playerError } = await supabase
+                const { data: playerData, error: playerError } = await requireSupabase()
                     .from('players')
                     .insert({
                         derby_name: formData.derby_name.trim(),
@@ -157,7 +157,7 @@ const Players: React.FC = () => {
                 if (playerError) throw playerError
 
                 // Insert team assignments
-                const { error: insertError } = await supabase
+                const { error: insertError } = await requireSupabase()
                     .from('player_teams')
                     .insert(
                         formData.selectedTeams.map(team => ({
@@ -193,7 +193,7 @@ const Players: React.FC = () => {
         }
 
         try {
-            const { error } = await supabase
+            const { error } = await requireSupabase()
                 .from('players')
                 .delete()
                 .eq('id', player.id)

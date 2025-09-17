@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { requireSupabase } from '../lib/supabase'
 import './Auth.css'
 
 interface AuthProps {
@@ -19,6 +19,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     setMessage('')
 
     try {
+      const supabase = requireSupabase()
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
@@ -45,7 +46,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     <div className="auth-container">
       <div className="auth-form">
         <h2>{isSignUp ? 'Sign Up' : 'Sign In'} to Derby Stat Tracker</h2>
-        
+
         <form onSubmit={handleAuth}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -58,7 +59,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
@@ -70,14 +71,14 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
               required
             />
           </div>
-          
+
           <button type="submit" disabled={loading} className="auth-button">
             {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
           </button>
         </form>
-        
+
         {message && <p className="auth-message">{message}</p>}
-        
+
         <p className="auth-toggle">
           {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
           <button
