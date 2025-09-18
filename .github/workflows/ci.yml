@@ -87,12 +87,12 @@ jobs:
           echo "Build artifacts ready for deployment"
 
       - name: Deploy to Vercel
-        uses: vercel/action@v2
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          args: "--prod --prebuilt"
+          vercel-args: "--prod --prebuilt"
 
   deploy-preview:
     name: Deploy to Vercel Preview
@@ -117,9 +117,9 @@ jobs:
           echo "Build artifacts ready for preview deployment"
 
       - name: Deploy to Vercel Preview
-        uses: vercel/action@v2
+        uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          args: "--prebuilt"
+          vercel-args: "--prebuilt"
