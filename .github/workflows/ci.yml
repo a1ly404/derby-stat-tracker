@@ -90,7 +90,7 @@ jobs:
     name: Deploy to Vercel Preview
     runs-on: ubuntu-latest
     needs: test # This ensures deployment only runs if tests pass
-    if: github.ref == 'refs/heads/dev' # Only deploy preview from dev branch
+    if: github.ref == 'refs/heads/dev' || github.event.pull_request.head.ref == 'dev' # Deploy preview from dev branch or PRs from dev
 
     steps:
       - name: Checkout code
