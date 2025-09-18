@@ -1,113 +1,221 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
-// Mock data for tests
+// Test data constants to avoid magic numbers and duplication
+const TEST_IDS = {
+  TEAM_1: '1',
+  TEAM_2: '2',
+  PLAYER_1: '1',
+  PLAYER_2: '2',
+  PLAYER_3: '3',
+  BOUT_1: '1',
+  USER: '1'
+} as const
+
+const TEST_NUMBERS = {
+  PLAYER_1_NUMBER: '100',
+  PLAYER_2_NUMBER: '200',
+  PLAYER_3_NUMBER: '300'
+} as const
+
+const TEST_DATES = {
+  TEAM_1_CREATED: '2024-01-01',
+  TEAM_2_CREATED: '2024-01-02',
+  PLAYER_1_CREATED: '2024-01-01',
+  PLAYER_2_CREATED: '2024-01-02',
+  PLAYER_3_CREATED: '2024-01-03',
+  BOUT_DATE: '2024-02-15',
+  BOUT_CREATED: '2024-02-15',
+  TEAM_1_FOUNDING: '2023-12-31'
+} as const
+
+const TEST_NAMES = {
+  TEAM_1: 'Roller Derby Team 1',
+  TEAM_2: 'Roller Derby Team 2',
+  TEST_TEAM_1: 'Test Team 1',
+  TEST_TEAM_2: 'Test Team 2',
+  PLAYER_1: 'Test Player 1',
+  PLAYER_2: 'Test Player 2',
+  PLAYER_3: 'Test Player 3',
+  ROSTER_PLAYER_1: 'Player 1',
+  ROSTER_PLAYER_2: 'Player 2',
+  ROSTER_PLAYER_3: 'Player 3'
+} as const
+
+const TEST_POSITIONS = {
+  BLOCKER: 'blocker',
+  JAMMER: 'jammer',
+  PIVOT: 'pivot'
+} as const
+
+const TEST_SCORES = {
+  HOME_SCORE: 120,
+  AWAY_SCORE: 105
+} as const
+
+const TEST_AUTH = {
+  USER_EMAIL: 'test@example.com',
+  SUPABASE_URL: 'https://test.supabase.co',
+  SUPABASE_ANON_KEY: 'test-anon-key'
+} as const
+
+// Factory functions for creating test data
+type MockPlayerTeamAssignment = {
+  number: string
+  position: string
+  is_active: boolean
+  teams: { id: string; name: string }
+}
+
+type MockBoutTeam = {
+  id: string
+  name: string
+  created_at: string
+  logo_url: string | null
+}
+
+const createMockTeam = (id: string, name: string, createdAt: string, roster: Array<{ player_id: string; player_name: string }>) => ({
+  id,
+  name,
+  created_at: createdAt,
+  roster
+})
+
+const createMockPlayerTeamAssignment = (number: string, position: string, isActive: boolean, teamId: string, teamName: string): MockPlayerTeamAssignment => ({
+  number,
+  position,
+  is_active: isActive,
+  teams: { id: teamId, name: teamName }
+})
+
+const createMockPlayer = (id: string, derbyName: string, preferredNumber: string, createdAt: string, playerTeams: MockPlayerTeamAssignment[]) => ({
+  id,
+  derby_name: derbyName,
+  preferred_number: preferredNumber,
+  created_at: createdAt,
+  player_teams: playerTeams
+})
+
+const createMockBoutTeam = (id: string, name: string, createdAt: string, logoUrl: string | null = null): MockBoutTeam => ({
+  id,
+  name,
+  created_at: createdAt,
+  logo_url: logoUrl
+})
+
+const createMockBout = (id: string, date: string, homeTeamId: string, awayTeamId: string, homeScore: number, awayScore: number, status: string, createdAt: string, homeTeam: MockBoutTeam, awayTeam: MockBoutTeam) => ({
+  id,
+  date,
+  home_team_id: homeTeamId,
+  away_team_id: awayTeamId,
+  home_score: homeScore,
+  away_score: awayScore,
+  status,
+  created_at: createdAt,
+  home_team: homeTeam,
+  away_team: awayTeam
+})
+
+// Mock data using factory functions and constants
 const mockTeams = [
-  {
-    id: '1',
-    name: 'Roller Derby Team 1',
-    created_at: '2024-01-01',
-    roster: [
-      { player_id: '1', player_name: 'Player 1' },
-      { player_id: '2', player_name: 'Player 2' }
+  createMockTeam(
+    TEST_IDS.TEAM_1,
+    TEST_NAMES.TEAM_1,
+    TEST_DATES.TEAM_1_CREATED,
+    [
+      { player_id: TEST_IDS.PLAYER_1, player_name: TEST_NAMES.ROSTER_PLAYER_1 },
+      { player_id: TEST_IDS.PLAYER_2, player_name: TEST_NAMES.ROSTER_PLAYER_2 }
     ]
-  },
-  {
-    id: '2',
-    name: 'Roller Derby Team 2', 
-    created_at: '2024-01-02',
-    roster: [
-      { player_id: '3', player_name: 'Player 3' }
+  ),
+  createMockTeam(
+    TEST_IDS.TEAM_2,
+    TEST_NAMES.TEAM_2,
+    TEST_DATES.TEAM_2_CREATED,
+    [
+      { player_id: TEST_IDS.PLAYER_3, player_name: TEST_NAMES.ROSTER_PLAYER_3 }
     ]
-  }
+  )
 ]
 
 const mockPlayers = [
-  { 
-    id: '1', 
-    derby_name: 'Test Player 1', 
-    preferred_number: '100', 
-    created_at: '2024-01-01',
-    player_teams: [
-      {
-        number: '100',
-        position: 'blocker',
-        is_active: true,
-        teams: { id: '1', name: 'Test Team 1' }
-      }
+  createMockPlayer(
+    TEST_IDS.PLAYER_1,
+    TEST_NAMES.PLAYER_1,
+    TEST_NUMBERS.PLAYER_1_NUMBER,
+    TEST_DATES.PLAYER_1_CREATED,
+    [
+      createMockPlayerTeamAssignment(
+        TEST_NUMBERS.PLAYER_1_NUMBER,
+        TEST_POSITIONS.BLOCKER,
+        true,
+        TEST_IDS.TEAM_1,
+        TEST_NAMES.TEST_TEAM_1
+      )
     ]
-  },
-  { 
-    id: '2', 
-    derby_name: 'Test Player 2', 
-    preferred_number: '200', 
-    created_at: '2024-01-02',
-    player_teams: [
-      {
-        number: '200',
-        position: 'jammer',
-        is_active: true,
-        teams: { id: '2', name: 'Test Team 2' }
-      }
+  ),
+  createMockPlayer(
+    TEST_IDS.PLAYER_2,
+    TEST_NAMES.PLAYER_2,
+    TEST_NUMBERS.PLAYER_2_NUMBER,
+    TEST_DATES.PLAYER_2_CREATED,
+    [
+      createMockPlayerTeamAssignment(
+        TEST_NUMBERS.PLAYER_2_NUMBER,
+        TEST_POSITIONS.JAMMER,
+        true,
+        TEST_IDS.TEAM_2,
+        TEST_NAMES.TEST_TEAM_2
+      )
     ]
-  },
-  { 
-    id: '3', 
-    derby_name: 'Test Player 3', 
-    preferred_number: '300', 
-    created_at: '2024-01-03',
-    player_teams: [
-      {
-        number: '300',
-        position: 'pivot',
-        is_active: false,
-        teams: { id: '1', name: 'Test Team 1' }
-      }
+  ),
+  createMockPlayer(
+    TEST_IDS.PLAYER_3,
+    TEST_NAMES.PLAYER_3,
+    TEST_NUMBERS.PLAYER_3_NUMBER,
+    TEST_DATES.PLAYER_3_CREATED,
+    [
+      createMockPlayerTeamAssignment(
+        TEST_NUMBERS.PLAYER_3_NUMBER,
+        TEST_POSITIONS.PIVOT,
+        false,
+        TEST_IDS.TEAM_1,
+        TEST_NAMES.TEST_TEAM_1
+      )
     ]
-  }
+  )
 ]
 
 const mockBouts = [
-  {
-    id: '1',
-    date: '2024-02-15',
-    home_team_id: '1',
-    away_team_id: '2',
-    home_score: 120,
-    away_score: 105,
-    status: 'completed',
-    created_at: '2024-02-15',
-    home_team: {
-      id: '1',
-      name: 'Roller Derby Team 1',
-      created_at: '2023-12-31',
-      logo_url: null
-    },
-    away_team: {
-      id: '2',
-      name: 'Roller Derby Team 2',
-      created_at: '2024-01-01',
-      logo_url: null
-    }
-  }
+  createMockBout(
+    TEST_IDS.BOUT_1,
+    TEST_DATES.BOUT_DATE,
+    TEST_IDS.TEAM_1,
+    TEST_IDS.TEAM_2,
+    TEST_SCORES.HOME_SCORE,
+    TEST_SCORES.AWAY_SCORE,
+    'completed',
+    TEST_DATES.BOUT_CREATED,
+    createMockBoutTeam(TEST_IDS.TEAM_1, TEST_NAMES.TEAM_1, TEST_DATES.TEAM_1_FOUNDING),
+    createMockBoutTeam(TEST_IDS.TEAM_2, TEST_NAMES.TEAM_2, TEST_DATES.TEAM_1_CREATED)
+  )
 ]
 
 // Mock environment variables for tests
 vi.mock('import.meta', () => ({
   env: {
-    VITE_SUPABASE_URL: 'https://test.supabase.co',
-    VITE_SUPABASE_ANON_KEY: 'test-anon-key'
+    VITE_SUPABASE_URL: TEST_AUTH.SUPABASE_URL,
+    VITE_SUPABASE_ANON_KEY: TEST_AUTH.SUPABASE_ANON_KEY
   }
 }))
 
 // Reusable mock factory functions to eliminate duplication
 const createMockAuth = () => ({
   signUp: vi.fn(() => Promise.resolve({ 
-    data: { user: { id: '1', email: 'test@example.com' } }, 
+    data: { user: { id: TEST_IDS.USER, email: TEST_AUTH.USER_EMAIL } }, 
     error: null 
   })),
   signInWithPassword: vi.fn(() => Promise.resolve({ 
-    data: { user: { id: '1', email: 'test@example.com' } }, 
+    data: { user: { id: TEST_IDS.USER, email: TEST_AUTH.USER_EMAIL } }, 
     error: null 
   })),
   signOut: vi.fn(() => Promise.resolve({ error: null })),
@@ -176,7 +284,7 @@ vi.mock('../lib/supabase', () => ({
 // Mock useAuth hook
 vi.mock('../hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({
-    user: { id: '1', email: 'test@example.com' },
+    user: { id: TEST_IDS.USER, email: TEST_AUTH.USER_EMAIL },
     loading: false,
     session: { access_token: 'test-token' },
     signOut: vi.fn()
