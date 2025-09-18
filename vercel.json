@@ -1,0 +1,17 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci",
+  "devCommand": "npm run dev",
+  "framework": "vite",
+  "github": {
+    "enabled": true,
+    "autoAlias": false
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "dev": false
+    }
+  }
+}
