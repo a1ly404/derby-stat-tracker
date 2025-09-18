@@ -15,7 +15,7 @@ jobs:
 
     env:
       # Environment variables for better CI compatibility
-      NODE_OPTIONS: --experimental-vm-modules --max-old-space-size=4096
+      NODE_OPTIONS: --experimental-vm-modules --max-old-space-size=2048
       FORCE_COLOR: 0
       CI: true
       # Disable analytics in CI
