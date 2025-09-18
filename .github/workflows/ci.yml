@@ -37,8 +37,6 @@ jobs:
 
       - name: Generate test coverage
         run: npm run test:coverage
-        continue-on-error: true
-
   build:
     name: Build Application
     runs-on: ubuntu-latest
