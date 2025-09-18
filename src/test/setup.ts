@@ -459,11 +459,14 @@ const createMockSupabaseClient = () => ({
   from: createMockFrom()
 })
 
+// Create a singleton mock Supabase client for all tests
+const mockSupabaseClient = createMockSupabaseClient();
+
 // Mock Supabase client for tests
 vi.mock('../lib/supabase', () => ({
-  supabase: createMockSupabaseClient(),
+  supabase: mockSupabaseClient,
   isSupabaseConfigured: true,
-  requireSupabase: vi.fn(() => createMockSupabaseClient())
+  requireSupabase: vi.fn(() => mockSupabaseClient)
 }))
 
 // Utility function for creating consistent auth mock configurations
