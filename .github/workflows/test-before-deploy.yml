@@ -35,5 +35,5 @@ jobs:
 
       - name: Build application
         run: npm run build
-      - name: Test results
-        run: echo "✅ All tests passed! Ready for deployment."
+        - name: Test results
+          run: echo "✅ All tests passed! Ready for deployment."
