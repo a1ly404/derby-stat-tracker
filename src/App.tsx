@@ -11,7 +11,7 @@ import { ConfigurationError } from './components/ConfigurationError'
 import { useAuth } from './hooks/useAuth'
 import { isSupabaseConfigured } from './lib/supabase'
 import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from '@vercel/speed-insights/react';
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 
 type ActiveView = 'dashboard' | 'players' | 'bouts' | 'teams' | 'settings'

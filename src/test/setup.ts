@@ -189,7 +189,7 @@ const createMockFrom = () => vi.fn((table: string) => {
     filters: Array<{ field: string; value: unknown; operator: string }>
     orderBy?: { field: string; ascending: boolean }
     limitCount?: number
-    error: unknown
+    error: Error | null
     shouldSimulateError?: boolean
     errorType?: 'fetch' | 'network' | 'timeout' | 'permission'
   }
@@ -333,7 +333,7 @@ const createMockFrom = () => vi.fn((table: string) => {
           errorType
         })
       }),
-      withError: vi.fn((error: unknown) => {
+      withError: vi.fn((error: Error | null) => {
         return createChainableQuery({
           ...state,
           error
@@ -444,7 +444,7 @@ const createMockFrom = () => vi.fn((table: string) => {
         errorType
       })
     }),
-    withError: vi.fn((error: unknown) => {
+    withError: vi.fn((error: Error | null) => {
       return createChainableQuery({ 
         data: [...data], 
         filters: [], 
