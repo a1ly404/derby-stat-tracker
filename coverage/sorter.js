@@ -96,14 +96,28 @@ var addSorting = (function() {
             data = {},
             i,
             val;
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return str;
+            return str.replace(/[&<>"']/g, function (c) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                })[c];
+            });
+        }
         for (i = 0; i < tableCols.length; i += 1) {
             colNode = tableCols[i];
             col = cols[i];
             val = colNode.getAttribute('data-value');
             if (col.type === 'number') {
                 val = Number(val);
+                data[col.key] = val;
+            } else {
+                data[col.key] = escapeHTML(val);
             }
-            data[col.key] = val;
         }
         return data;
     }
