@@ -77,10 +77,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files
+          path: dist/
+
+      - name: Verify build artifacts
+        run: |
+          echo "Verifying build artifacts..."
+          ls -la dist/
+          echo "Build artifacts ready for deployment"
+
       - name: Deploy to Vercel
         uses: vercel/action@v2
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          args: "--prod"
+          args: "--prod --prebuilt"
