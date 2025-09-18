@@ -1,20 +1,15 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
-// Fix for jsdom compatibility issues in CI environments
-// Add global polyfills that jsdom might be missing
+// Test environment setup for happy-dom
+// happy-dom is more lightweight and compatible than jsdom
 if (typeof global !== 'undefined') {
-  // Ensure global.Map exists for webidl-conversions
-  if (!global.Map) {
-    global.Map = Map;
-  }
-  // Ensure global.Set exists
-  if (!global.Set) {
-    global.Set = Set;
-  }
-  // Ensure global.WeakMap exists
-  if (!global.WeakMap) {
-    global.WeakMap = WeakMap;
+  // Ensure essential globals exist
+  if (!global.Map) global.Map = Map;
+  if (!global.Set) global.Set = Set;
+  if (!global.WeakMap) global.WeakMap = WeakMap;
+  if (!global.structuredClone) {
+    global.structuredClone = (obj: unknown) => JSON.parse(JSON.stringify(obj));
   }
 }
 
