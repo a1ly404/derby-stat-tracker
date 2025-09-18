@@ -194,8 +194,25 @@ const createMockFrom = () => vi.fn((table: string) => {
     errorType?: 'fetch' | 'network' | 'timeout' | 'permission'
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const createChainableQuery = (state: QueryState = { data: [...data], filters: [], error: null }): any => {
+  interface ChainableQuery {
+    select: (fields: string[]) => ChainableQuery
+    eq: (field: string, value: unknown) => ChainableQuery
+    neq: (field: string, value: unknown) => ChainableQuery
+    gt: (field: string, value: number) => ChainableQuery
+    lt: (field: string, value: number) => ChainableQuery
+    order: (field: string, options?: { ascending?: boolean }) => ChainableQuery
+    limit: (count: number) => ChainableQuery
+    throwError: (error: unknown) => ChainableQuery
+    simulateError: (type: 'fetch' | 'network' | 'timeout' | 'permission') => ChainableQuery
+    then: (onFulfilled: (value: { data: unknown[]; error: unknown }) => unknown, onRejected?: (reason: unknown) => unknown) => Promise<unknown>
+    catch: (onRejected: (reason: unknown) => unknown) => Promise<unknown>
+    single: () => Promise<{ data: unknown; error: unknown }>
+    maybeSingle: () => Promise<{ data: unknown | null; error: unknown }>
+    returns: () => { data: unknown[]; error: unknown }
+    returnsError: () => { data: null; error: unknown }
+  }
+
+  const createChainableQuery = (state: QueryState = { data: [...data], filters: [], error: null }): ChainableQuery => {
     const applyFilters = (data: unknown[], filters: QueryState['filters']): unknown[] => {
       return data.filter(item => {
         return filters.every(filter => {
