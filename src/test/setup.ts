@@ -38,11 +38,11 @@ function includesAllowedVercelScriptHost(text: string): boolean {
         if (url.host === 'va.vercel-scripts.com') {
           return true;
         }
-      } catch (e) {
+      } catch {
         // Not a valid URL -- skip
       }
     }
-  } catch (e) {
+  } catch {
     // Defensive: never crash
   }
   return false;
