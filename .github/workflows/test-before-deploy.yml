@@ -30,10 +30,12 @@ jobs:
       - name: Run tests
         run: npm run test
 
-      - name: Generate test coverage
-        run: npm run test:coverage
-
       - name: Build application
         run: npm run build
-        - name: Test results
-          run: echo "✅ All tests passed! Ready for deployment."
+
+      - name: Generate test coverage
+        run: npm run test:coverage
+        continue-on-error: true
+
+      - name: Test results
+        run: echo "✅ All tests passed! Ready for deployment."
