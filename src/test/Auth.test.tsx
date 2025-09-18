@@ -35,11 +35,11 @@ describe('Auth Component', () => {
     const user = userEvent.setup()
     render(<Auth onAuthSuccess={mockOnAuthSuccess} />)
 
-    const signUpLink = screen.getByText(/need an account/i)
-    await user.click(signUpLink)
+    const signUpButton = screen.getByRole('button', { name: /sign up/i })
+    await user.click(signUpButton)
 
-    expect(screen.getByText('Create Derby Stat Tracker Account')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument()
+    expect(screen.getByText('Sign Up to Derby Stat Tracker')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument()
   })
 
   it('handles successful sign in', async () => {
@@ -64,7 +64,7 @@ describe('Auth Component', () => {
   it('handles sign in error', async () => {
     const user = userEvent.setup()
     mockSupabase.auth.signInWithPassword.mockResolvedValue({
-      error: { message: 'Invalid credentials' }
+      error: new Error('Invalid credentials')
     })
 
     render(<Auth onAuthSuccess={mockOnAuthSuccess} />)
@@ -85,11 +85,12 @@ describe('Auth Component', () => {
     render(<Auth onAuthSuccess={mockOnAuthSuccess} />)
 
     // Switch to sign up mode
-    await user.click(screen.getByText(/need an account/i))
+    const signUpButton = screen.getByRole('button', { name: /sign up/i })
+    await user.click(signUpButton)
 
     await user.type(screen.getByLabelText(/email/i), 'newuser@example.com')
     await user.type(screen.getByLabelText(/password/i), 'newpassword123')
-    await user.click(screen.getByRole('button', { name: /create account/i }))
+    await user.click(screen.getByRole('button', { name: /sign up/i }))
 
     await waitFor(() => {
       expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
@@ -116,7 +117,7 @@ describe('Auth Component', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
     // Should show loading state
-    expect(screen.getByText(/signing in/i)).toBeInTheDocument()
+    expect(screen.getByText(/loading/i)).toBeInTheDocument()
 
     // Resolve the promise
     resolveAuth!({ error: null })

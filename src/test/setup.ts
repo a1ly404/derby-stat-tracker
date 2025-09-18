@@ -23,9 +23,48 @@ const mockTeams = [
 ]
 
 const mockPlayers = [
-  { id: '1', name: 'Player 1', derby_number: '42', created_at: '2024-01-01' },
-  { id: '2', name: 'Player 2', derby_number: '13', created_at: '2024-01-02' },
-  { id: '3', name: 'Player 3', derby_number: '7', created_at: '2024-01-03' }
+  { 
+    id: '1', 
+    derby_name: 'Test Player 1', 
+    preferred_number: '100', 
+    created_at: '2024-01-01',
+    player_teams: [
+      {
+        number: '100',
+        position: 'blocker',
+        is_active: true,
+        teams: { id: '1', name: 'Test Team 1' }
+      }
+    ]
+  },
+  { 
+    id: '2', 
+    derby_name: 'Test Player 2', 
+    preferred_number: '200', 
+    created_at: '2024-01-02',
+    player_teams: [
+      {
+        number: '200',
+        position: 'jammer',
+        is_active: true,
+        teams: { id: '2', name: 'Test Team 2' }
+      }
+    ]
+  },
+  { 
+    id: '3', 
+    derby_name: 'Test Player 3', 
+    preferred_number: '300', 
+    created_at: '2024-01-03',
+    player_teams: [
+      {
+        number: '300',
+        position: 'pivot',
+        is_active: false,
+        teams: { id: '1', name: 'Test Team 1' }
+      }
+    ]
+  }
 ]
 
 const mockBouts = [
@@ -36,7 +75,20 @@ const mockBouts = [
     away_team_id: '2',
     home_score: 120,
     away_score: 105,
-    created_at: '2024-02-15'
+    status: 'completed',
+    created_at: '2024-02-15',
+    home_team: {
+      id: '1',
+      name: 'Roller Derby Team 1',
+      created_at: '2023-12-31',
+      logo_url: null
+    },
+    away_team: {
+      id: '2',
+      name: 'Roller Derby Team 2',
+      created_at: '2024-01-01',
+      logo_url: null
+    }
   }
 ]
 
@@ -82,8 +134,16 @@ vi.mock('../lib/supabase', () => ({
           data = []
       }
       
+      const createChainableQuery = () => ({
+        select: vi.fn(() => createChainableQuery()),
+        order: vi.fn(() => createChainableQuery()),
+        limit: vi.fn(() => createChainableQuery()),
+        eq: vi.fn(() => createChainableQuery()),
+        then: vi.fn((onResolve) => onResolve({ data, error: null }))
+      })
+      
       return {
-        select: vi.fn(() => Promise.resolve({ data, error: null })),
+        select: vi.fn(() => createChainableQuery()),
         insert: vi.fn(() => ({
           select: vi.fn(() => Promise.resolve({ 
             data: [{ id: 'new-id', name: 'New Item' }], 
@@ -96,8 +156,9 @@ vi.mock('../lib/supabase', () => ({
         delete: vi.fn(() => ({
           eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
         })),
-        eq: vi.fn(() => Promise.resolve({ data: null, error: null })),
-        order: vi.fn(() => Promise.resolve({ data, error: null }))
+        eq: vi.fn(() => createChainableQuery()),
+        order: vi.fn(() => createChainableQuery()),
+        limit: vi.fn(() => createChainableQuery())
       }
     })
   },
@@ -134,8 +195,16 @@ vi.mock('../lib/supabase', () => ({
           data = []
       }
       
+      const createChainableQuery = () => ({
+        select: vi.fn(() => createChainableQuery()),
+        order: vi.fn(() => createChainableQuery()),
+        limit: vi.fn(() => createChainableQuery()),
+        eq: vi.fn(() => createChainableQuery()),
+        then: vi.fn((onResolve) => onResolve({ data, error: null }))
+      })
+      
       return {
-        select: vi.fn(() => Promise.resolve({ data, error: null })),
+        select: vi.fn(() => createChainableQuery()),
         insert: vi.fn(() => ({
           select: vi.fn(() => Promise.resolve({ 
             data: [{ id: 'new-id', name: 'New Item' }], 
@@ -148,8 +217,9 @@ vi.mock('../lib/supabase', () => ({
         delete: vi.fn(() => ({
           eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
         })),
-        eq: vi.fn(() => Promise.resolve({ data: null, error: null })),
-        order: vi.fn(() => Promise.resolve({ data, error: null }))
+        eq: vi.fn(() => createChainableQuery()),
+        order: vi.fn(() => createChainableQuery()),
+        limit: vi.fn(() => createChainableQuery())
       }
     })
   }))
