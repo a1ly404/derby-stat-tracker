@@ -52,12 +52,11 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
-      - name: Build application
-        run: npm run build
-
       - name: Run test coverage
         run: npm run test:coverage
 
+      - name: Build application
+        run: npm run build
       # This step will fail the workflow if any of the above steps failed
       - name: Quality gate passed
         run: echo "✅ All quality checks passed! Ready for deployment."
