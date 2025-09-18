@@ -468,14 +468,16 @@ describe('Players Component', () => {
             throw mockError
         })
 
-        render(<Players />)
+        try {
+            render(<Players />)
 
-        await waitFor(() => {
-            expect(screen.getByText(/data transformation failed/i)).toBeInTheDocument()
-        })
-
-        // Restore the mock
-        mockRequireSupabase.mockRestore()
+            await waitFor(() => {
+                expect(screen.getByText(/data transformation failed/i)).toBeInTheDocument()
+            })
+        } finally {
+            // Restore the mock
+            mockRequireSupabase.mockRestore()
+        }
     })
 
     it('handles form submission with missing team assignments', async () => {
