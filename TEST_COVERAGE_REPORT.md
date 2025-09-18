@@ -1,108 +1,148 @@
-# Derby Stat Tracker - Test Coverage Analysis
+# Test Coverage Report
 
-## Current Test Status Summary
+**Generated**: September 18, 2025  
+**Test Run**: 119 tests passed (15 test files)  
+**Duration**: 12.91s
 
-### ✅ Passing Tests (9/30 total)
+## 📊 Overall Coverage Summary
 
-- **ConfigurationError Component**: 4/4 tests passing - **100% coverage**
-- **Navigation Component**: 5/5 tests passing - **100% coverage**
+| Metric      | Percentage | Quality |
+|-------------|------------|---------|
+| Statements  | **87.15%** | 🟢 Excellent |
+| Branches    | **71.03%** | 🟡 Good |
+| Functions   | **72.41%** | 🟡 Good |
+| Lines       | **87.15%** | 🟢 Excellent |
 
-### ❌ Failing Tests (21/30 total)
+## 📁 Detailed Coverage by Directory
 
-- **Auth Component**: 1/6 tests passing (5 failing)
-- **Dashboard Component**: 0/6 tests passing (6 failing)
-- **Teams Component**: 0/6 tests passing (6 failing)
-- **Players Component**: 0/6 tests passing (6 failing)
-- **Bouts Component**: 0/6 tests passing (6 failing)
+### 🚀 src/ (Main Application)
+- **Coverage**: 96.72% statements | 83.33% branches | 50% functions | 96.72% lines
+- **Status**: ✅ Excellent coverage
+- **Files**: App.tsx (95.91%), main.tsx (100%)
 
-## Coverage Report (Based on Passing Tests Only)
+### 🧩 src/components/ (UI Components)
+- **Coverage**: 87.72% statements | 70% branches | 71.62% functions | 87.72% lines
+- **Status**: ✅ Good coverage with room for improvement
 
-| Component | Coverage | Status |
-|-----------|----------|---------|
-| ConfigurationError.tsx | 100% | ✅ Fully tested |
-| Navigation.tsx | 100% | ✅ Fully tested |
-| All other components | 0% | ❌ Tests failing |
+#### Component Breakdown:
+| Component | Statements | Branches | Functions | Lines | Status |
+|-----------|------------|----------|-----------|-------|--------|
+| **Auth.tsx** | 100% | 91.3% | 100% | 100% | 🟢 Perfect |
+| **ConfigurationError.tsx** | 100% | 100% | 100% | 100% | 🟢 Perfect |
+| **ErrorBoundary.tsx** | 100% | 100% | 80% | 100% | 🟢 Excellent |
+| **Header.tsx** | 100% | 100% | 100% | 100% | 🟢 Perfect |
+| **Navigation.tsx** | 100% | 100% | 100% | 100% | 🟢 Perfect |
+| **Players.tsx** | 89.71% | 77.27% | 73.68% | 89.71% | 🟢 Good |
+| **Dashboard.tsx** | 86.63% | 70.58% | 66.66% | 86.63% | 🟡 Good |
+| **Bouts.tsx** | 83.24% | 52.83% | 60% | 83.24% | 🟡 Needs work |
+| **Teams.tsx** | 81.15% | 51.72% | 66.66% | 81.15% | 🟡 Needs work |
 
-### Overall Coverage Statistics
+### 🔗 src/contexts/ (React Contexts)
+- **Coverage**: 79.48% statements | 66.66% branches | 50% functions | 79.48% lines
+- **Status**: 🟡 Adequate coverage
+- **Files**: SupabaseContext.tsx - needs error handling tests
 
-- **Total Statement Coverage**: 7.37%
-- **Branch Coverage**: 40%
-- **Function Coverage**: 22.72%
-- **Line Coverage**: 7.37%
+### 🪝 src/hooks/ (Custom Hooks)
+- **Coverage**: 83.33% statements | 71.42% branches | 100% functions | 83.33% lines
+- **Status**: 🟢 Good coverage
+- **Files**: useAuth.ts - missing some edge cases
 
-## Primary Issues Blocking Coverage
+### 📚 src/lib/ (Core Libraries)
+- **Coverage**: 0% statements | 0% branches | 0% functions | 0% lines
+- **Status**: ❌ No coverage
+- **Files**: supabase.ts - completely untested but mostly configuration
 
-### 1. Supabase Mock Implementation Gap
+### 🛠️ src/utils/ (Utilities)
+- **Coverage**: 100% statements | 100% branches | 100% functions | 100% lines
+- **Status**: 🟢 Perfect coverage
+- **Files**: emojis.ts - fully tested
 
-```
-Error: requireSupabase(...).from(...).select(...).order is not a function
-```
+## 🎯 Areas Needing Attention
 
-**Impact**: Affects Dashboard, Teams, Players, and Bouts components
-**Solution Needed**: Update mock in `src/test/setup.ts` to include `.order()` method
+### 🔴 Critical Improvements Needed:
+1. **Bouts.tsx** (83.24% statements, 52.83% branches)
+   - Missing tests for lines: 69-70, 83-84, 115-117, 124-129, 137-156, 160-172, 186-187, 413-420, 442-449, 462-464
+   - Need error handling and edge case tests
 
-### 2. Component Text Matching Issues
+2. **Teams.tsx** (81.15% statements, 51.72% branches)
+   - Missing tests for lines: 29, 46-48, 53-61, 80-81, 87-88, 99-100, 105-111, 143-145, 198-205
+   - Need error handling and edge case tests
 
-**Examples of mismatches**:
+### 🟡 Moderate Improvements:
+3. **Dashboard.tsx** (86.63% statements, 70.58% branches)
+   - Missing tests for lines: 84-86, 104-106, 247-249, 256-263, 279-291, 309-311
+   - Need loading state and error condition tests
 
-- Test expects: `/need an account/i`
-- Actual text: `"Don't have an account?"`
-- Test expects: `/signing in/i`
-- Actual text: `"Loading..."`
+4. **SupabaseContext.tsx** (79.48% statements, 66.66% branches)
+   - Missing tests for lines: 28-30, 43-45, 52-53
+   - Need error handling tests
 
-**Impact**: Affects Auth component tests
-**Solution Needed**: Update test assertions to match actual rendered text
+5. **useAuth.ts** (83.33% statements, 71.42% branches)
+   - Missing tests for lines: 13-15, 28-30
+   - Need edge case coverage
 
-### 3. Error Message Handling
+## ✅ Well-Tested Components
 
-- Tests expect specific error messages like "Invalid credentials"
-- Components show generic "An error occurred" messages
-- Need alignment between expected and actual error handling
+### 🏆 Perfect Coverage (100% statements):
+- **Auth.tsx** - Comprehensive authentication testing
+- **ConfigurationError.tsx** - Error display testing
+- **ErrorBoundary.tsx** - Error boundary testing
+- **Header.tsx** - UI component testing
+- **Navigation.tsx** - Navigation logic testing
+- **emojis.ts** - Utility function testing
 
-## Recommendations
+### 🎖️ Excellent Coverage (>95%):
+- **App.tsx** (95.91%) - Main application flow
+- **main.tsx** (100%) - Application entry point
 
-### Immediate Fixes (High Priority)
+## 📈 Testing Quality Assessment
 
-1. **Fix Supabase Mock**: Add `.order()` method to mock implementation
-2. **Update Auth Tests**: Match actual rendered text patterns
-3. **Standardize Error Messages**: Align test expectations with component behavior
+### 🟢 Strengths:
+- **Strong component testing** with 87.72% average coverage
+- **Comprehensive UI testing** for core navigation and auth flows
+- **Excellent utility testing** with 100% coverage
+- **Good integration testing** across components
+- **Robust mock infrastructure** in test setup
 
-### Medium Priority
+### 🔄 Areas for Growth:
+- **Error handling scenarios** need more coverage
+- **Complex form validation** could use additional tests
+- **Loading states** and async operations need attention
+- **Edge cases** in data manipulation components
+- **Integration between components** could be expanded
 
-1. **Component State Testing**: Improve loading state and error state test coverage
-2. **Integration Testing**: Add tests for component interactions
-3. **Data Flow Testing**: Test data loading and state management
+## 🚀 Recent Improvements
 
-### Testing Framework Quality Assessment
+### ✅ Infrastructure Enhancements:
+- **Refactored test constants** - eliminated magic numbers and duplicates
+- **Improved mock isolation** - removed global useAuth mock conflicts
+- **Enhanced error simulation** - comprehensive error testing capabilities
+- **TypeScript fixes** - resolved interface mismatches
+- **Better test organization** - cleaner, more maintainable test structure
 
-**Strengths**:
+### 📊 Coverage Metrics:
+- **119 tests** running successfully
+- **15 test files** with comprehensive coverage
+- **87.15% overall statement coverage** - excellent for a growing codebase
+- **Consistent testing patterns** across all components
 
-- ✅ Comprehensive test structure (7 test files covering all major components)
-- ✅ Proper test environment setup with jsdom and React Testing Library
-- ✅ Good separation of concerns with dedicated setup file
-- ✅ Coverage reporting properly configured
+## 🎯 Next Steps
 
-**Areas for Improvement**:
+### Priority 1 - Critical Coverage Gaps:
+1. Add error handling tests for **Bouts.tsx** and **Teams.tsx**
+2. Implement edge case testing for form validation
+3. Add async operation failure scenarios
 
-- ❌ Mock implementations incomplete (missing Supabase methods)
-- ❌ Test assertions don't match actual component behavior
-- ❌ Error scenarios need better alignment with actual error handling
+### Priority 2 - Moderate Improvements:
+1. Enhance **Dashboard.tsx** loading and error state tests
+2. Add **SupabaseContext.tsx** error boundary tests
+3. Expand **useAuth.ts** edge case coverage
 
-## Next Steps to Achieve Full Coverage
-
-1. **Phase 1**: Fix Supabase mocking to enable data-dependent tests
-2. **Phase 2**: Update text matching in Auth component tests
-3. **Phase 3**: Re-run full test suite and generate complete coverage report
-4. **Phase 4**: Target 80%+ coverage across all components
-
-## Technical Debt Notes
-
-- Current mocking strategy needs enhancement for complex database queries
-- Test data setup could be more comprehensive
-- Error boundary testing not yet implemented
-- Integration between components not thoroughly tested
+### Priority 3 - Infrastructure:
+1. Consider integration tests for component interactions
+2. Add performance testing for large data sets
+3. Implement accessibility testing coverage
 
 ---
-*Generated on: ${new Date().toISOString()}*
-*Test Framework: Vitest + React Testing Library*
-*Coverage Tool: @vitest/coverage-v8*
+
+*This report demonstrates a well-tested codebase with strong foundations and clear areas for strategic improvement. The 87% overall coverage indicates excellent testing discipline while highlighting specific opportunities for enhancement.*
