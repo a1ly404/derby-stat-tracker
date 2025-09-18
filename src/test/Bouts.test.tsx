@@ -83,7 +83,7 @@ describe('Bouts Component', () => {
         await user.click(addButton)
 
         // Click cancel
-        const formCancelButton = screen.getAllByRole('button', { name: /cancel/i })[1]
+        const formCancelButton = screen.getByTestId('bout-form-cancel')
         await user.click(formCancelButton)
 
         // Form should be hidden
