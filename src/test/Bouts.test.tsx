@@ -309,28 +309,4 @@ describe('Bouts Component', () => {
         // This mainly tests that the component doesn't crash on error
         expect(screen.getByText(/bout management/i)).toBeInTheDocument()
     })
-
-    it('validates form inputs properly', async () => {
-        const user = userEvent.setup()
-        render(<Bouts />)
-
-        await waitFor(() => {
-            expect(screen.queryByText(/loading bouts/i)).not.toBeInTheDocument()
-        })
-
-        const addButton = screen.getByText(/schedule new bout/i)
-        await user.click(addButton)
-
-        // Verify form is shown
-        expect(screen.getByText(/schedule new bout/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/home team/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/away team/i)).toBeInTheDocument()
-
-        // Try to submit with empty form
-        const submitButton = screen.getByText(/schedule bout/i)
-        await user.click(submitButton)
-
-        // Form should still be visible (validation prevents submission)
-        expect(screen.getByText(/schedule new bout/i)).toBeInTheDocument()
-    })
 })

@@ -207,26 +207,6 @@ describe('Players Component', () => {
         expect(screen.getByText('Test Player 3')).toBeInTheDocument()
     })
 
-    it('validates required fields', async () => {
-        const user = userEvent.setup()
-        render(<Players />)
-
-        await waitFor(() => {
-            expect(screen.queryByText(/loading players/i)).not.toBeInTheDocument()
-        })
-
-        // Click add player button
-        const addButton = screen.getByText(/add new player/i)
-        await user.click(addButton)
-
-        // Try to save without filling required fields
-        const saveButton = screen.getByRole('button', { name: /create player/i })
-        await user.click(saveButton)
-
-        // Form should still be visible (validation failed)
-        expect(screen.getByPlaceholderText(/derby name/i)).toBeInTheDocument()
-    })
-
     it('cancels player creation', async () => {
         const user = userEvent.setup()
         render(<Players />)

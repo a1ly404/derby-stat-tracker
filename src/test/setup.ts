@@ -100,129 +100,77 @@ vi.mock('import.meta', () => ({
   }
 }))
 
+// Reusable mock factory functions to eliminate duplication
+const createMockAuth = () => ({
+  signUp: vi.fn(() => Promise.resolve({ 
+    data: { user: { id: '1', email: 'test@example.com' } }, 
+    error: null 
+  })),
+  signInWithPassword: vi.fn(() => Promise.resolve({ 
+    data: { user: { id: '1', email: 'test@example.com' } }, 
+    error: null 
+  })),
+  signOut: vi.fn(() => Promise.resolve({ error: null })),
+  getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
+  onAuthStateChange: vi.fn(() => ({
+    data: { subscription: { unsubscribe: vi.fn() } }
+  }))
+})
+
+const createMockFrom = () => vi.fn((table: string) => {
+  let data: unknown[] = []
+  switch (table) {
+    case 'teams':
+      data = mockTeams
+      break
+    case 'players':
+      data = mockPlayers
+      break
+    case 'bouts':
+      data = mockBouts
+      break
+    default:
+      data = []
+  }
+  
+  const createChainableQuery = () => ({
+    select: vi.fn(() => createChainableQuery()),
+    order: vi.fn(() => createChainableQuery()),
+    limit: vi.fn(() => createChainableQuery()),
+    eq: vi.fn(() => createChainableQuery()),
+    then: vi.fn((onResolve) => onResolve({ data, error: null }))
+  })
+  
+  return {
+    select: vi.fn(() => createChainableQuery()),
+    insert: vi.fn(() => ({
+      select: vi.fn(() => Promise.resolve({ 
+        data: [{ id: 'new-id', name: 'New Item' }], 
+        error: null 
+      }))
+    })),
+    update: vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
+    })),
+    delete: vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
+    })),
+    eq: vi.fn(() => createChainableQuery()),
+    order: vi.fn(() => createChainableQuery()),
+    limit: vi.fn(() => createChainableQuery())
+  }
+})
+
+const createMockSupabaseClient = () => ({
+  auth: createMockAuth(),
+  from: createMockFrom()
+})
+
 // Mock Supabase client for tests
 vi.mock('../lib/supabase', () => ({
-  supabase: {
-    auth: {
-      signUp: vi.fn(() => Promise.resolve({ 
-        data: { user: { id: '1', email: 'test@example.com' } }, 
-        error: null 
-      })),
-      signInWithPassword: vi.fn(() => Promise.resolve({ 
-        data: { user: { id: '1', email: 'test@example.com' } }, 
-        error: null 
-      })),
-      signOut: vi.fn(() => Promise.resolve({ error: null })),
-      getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
-      onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } }
-      }))
-    },
-    from: vi.fn((table: string) => {
-      let data: unknown[] = []
-      switch (table) {
-        case 'teams':
-          data = mockTeams
-          break
-        case 'players':
-          data = mockPlayers
-          break
-        case 'bouts':
-          data = mockBouts
-          break
-        default:
-          data = []
-      }
-      
-      const createChainableQuery = () => ({
-        select: vi.fn(() => createChainableQuery()),
-        order: vi.fn(() => createChainableQuery()),
-        limit: vi.fn(() => createChainableQuery()),
-        eq: vi.fn(() => createChainableQuery()),
-        then: vi.fn((onResolve) => onResolve({ data, error: null }))
-      })
-      
-      return {
-        select: vi.fn(() => createChainableQuery()),
-        insert: vi.fn(() => ({
-          select: vi.fn(() => Promise.resolve({ 
-            data: [{ id: 'new-id', name: 'New Item' }], 
-            error: null 
-          }))
-        })),
-        update: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
-        })),
-        delete: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
-        })),
-        eq: vi.fn(() => createChainableQuery()),
-        order: vi.fn(() => createChainableQuery()),
-        limit: vi.fn(() => createChainableQuery())
-      }
-    })
-  },
+  supabase: createMockSupabaseClient(),
   isSupabaseConfigured: true,
-  requireSupabase: vi.fn(() => ({
-    auth: {
-      signUp: vi.fn(() => Promise.resolve({ 
-        data: { user: { id: '1', email: 'test@example.com' } }, 
-        error: null 
-      })),
-      signInWithPassword: vi.fn(() => Promise.resolve({ 
-        data: { user: { id: '1', email: 'test@example.com' } }, 
-        error: null 
-      })),
-      signOut: vi.fn(() => Promise.resolve({ error: null })),
-      getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
-      onAuthStateChange: vi.fn(() => ({
-        data: { subscription: { unsubscribe: vi.fn() } }
-      }))
-    },
-    from: vi.fn((table: string) => {
-      let data: unknown[] = []
-      switch (table) {
-        case 'teams':
-          data = mockTeams
-          break
-        case 'players':
-          data = mockPlayers
-          break
-        case 'bouts':
-          data = mockBouts
-          break
-        default:
-          data = []
-      }
-      
-      const createChainableQuery = () => ({
-        select: vi.fn(() => createChainableQuery()),
-        order: vi.fn(() => createChainableQuery()),
-        limit: vi.fn(() => createChainableQuery()),
-        eq: vi.fn(() => createChainableQuery()),
-        then: vi.fn((onResolve) => onResolve({ data, error: null }))
-      })
-      
-      return {
-        select: vi.fn(() => createChainableQuery()),
-        insert: vi.fn(() => ({
-          select: vi.fn(() => Promise.resolve({ 
-            data: [{ id: 'new-id', name: 'New Item' }], 
-            error: null 
-          }))
-        })),
-        update: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
-        })),
-        delete: vi.fn(() => ({
-          eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
-        })),
-        eq: vi.fn(() => createChainableQuery()),
-        order: vi.fn(() => createChainableQuery()),
-        limit: vi.fn(() => createChainableQuery())
-      }
-    })
-  }))
+  requireSupabase: vi.fn(() => createMockSupabaseClient())
 }))
 
 // Mock useAuth hook
