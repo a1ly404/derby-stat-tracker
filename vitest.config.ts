@@ -19,5 +19,21 @@ export default defineConfig({
     pool: 'forks',
     // Ensure proper environment isolation
     isolate: true,
+    // Coverage configuration
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      reportsDirectory: './coverage',
+      exclude: [
+        'node_modules/',
+        'dist/',
+        'coverage/',
+        '**/*.d.ts',
+        '**/*.test.{ts,tsx}',
+        '**/*.spec.{ts,tsx}',
+        'src/test/**',
+        'scripts/**'
+      ]
+    }
   },
 })

@@ -12,7 +12,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest run --coverage --reporter=text --reporter=lcov --coverage.reportsDirectory=coverage",
+    "test:coverage": "vitest run --coverage",
     "test:ci": "node scripts/test-ci-local.js",
     "pre-push": "npm run lint",
     "preview": "vite preview"
