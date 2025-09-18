@@ -37,14 +37,5 @@ jobs:
         run: npm run test:coverage
         continue-on-error: true # Don't fail if coverage generation has issues
 
-      - name: Comment PR with test results
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '✅ All tests passed! Ready for deployment.'
-            })
+      - name: Test results
+        run: echo "✅ All tests passed! Ready for deployment."
