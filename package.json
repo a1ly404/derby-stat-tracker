@@ -12,7 +12,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest run --coverage --reporter=text --reporter=lcov",
+    "test:coverage": "vitest run --coverage --reporter=text --reporter=lcov --coverage.reportsDirectory=coverage",
     "pre-push": "npm run lint",
     "preview": "vite preview"
   },
