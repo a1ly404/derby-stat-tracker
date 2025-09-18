@@ -30,7 +30,7 @@ try {
   console.log('');
   console.log('Expected workflow steps:');
   console.log('  1. ✅ Checkout repository');
-  console.log('  2. ✅ Setup Node.js 20');
+  console.log('  2. ✅ Setup Node.js 22');
   console.log('  3. ✅ Install dependencies');
   console.log('  4. ✅ Run ESLint');
   console.log('  5. ✅ Run unit tests (happy-dom)');
