@@ -11,6 +11,7 @@ import { ConfigurationError } from './components/ConfigurationError'
 import { useAuth } from './hooks/useAuth'
 import { isSupabaseConfigured } from './lib/supabase'
 import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 
 type ActiveView = 'dashboard' | 'players' | 'bouts' | 'teams' | 'settings'
@@ -52,6 +53,7 @@ function App() {
           {activeView === 'teams' && <Teams />}
           {activeView === 'settings' && <div className="view-placeholder">Settings - Coming Soon</div>}
           <Analytics />
+          <SpeedInsights />
         </main>
       </div>
     </div>

@@ -460,24 +460,19 @@ describe('Players Component', () => {
     })
 
     it('handles data transformation errors during fetch', async () => {
-        // Mock the requireSupabase to throw an error
+        // Mock the requireSupabase to throw an error for this test only
         const mockError = new Error('Data transformation failed')
         const mockRequireSupabase = vi.mocked(requireSupabase)
 
-        mockRequireSupabase.mockImplementation(() => {
+        mockRequireSupabase.mockImplementationOnce(() => {
             throw mockError
         })
 
-        try {
-            render(<Players />)
+        render(<Players />)
 
-            await waitFor(() => {
-                expect(screen.getByText(/data transformation failed/i)).toBeInTheDocument()
-            })
-        } finally {
-            // Restore the mock
-            mockRequireSupabase.mockRestore()
-        }
+        await waitFor(() => {
+            expect(screen.getByText(/data transformation failed/i)).toBeInTheDocument()
+        })
     })
 
     it('handles form submission with missing team assignments', async () => {

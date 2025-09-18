@@ -2,69 +2,50 @@ import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
 // Test data constants to avoid magic numbers and duplication
-const TEST_IDS = {
-  TEAM_1: '1',
-  TEAM_2: '2',
-  PLAYER_1: '1',
-  PLAYER_2: '2',
-  PLAYER_3: '3',
-  BOUT_1: '1',
-  USER: '1'
-} as const
+const TEAM1_ID = '1';
+const TEAM2_ID = '2';
+const TEAM1_NAME = 'Roller Derby Team 1';
+const TEAM2_NAME = 'Roller Derby Team 2';
+const TEST_TEAM1_NAME = 'Test Team 1';
+const TEST_TEAM2_NAME = 'Test Team 2';
+const PLAYER1_ID = '1';
+const PLAYER2_ID = '2';
+const PLAYER3_ID = '3';
+const PLAYER1_NAME = 'Player 1';
+const PLAYER2_NAME = 'Player 2';
+const PLAYER3_NAME = 'Player 3';
+const PLAYER1_DERBY = 'Test Player 1';
+const PLAYER2_DERBY = 'Test Player 2';
+const PLAYER3_DERBY = 'Test Player 3';
+const NUMBER_100 = '100';
+const NUMBER_200 = '200';
+const NUMBER_300 = '300';
 
-const TEST_NUMBERS = {
-  PLAYER_1_NUMBER: '100',
-  PLAYER_2_NUMBER: '200',
-  PLAYER_3_NUMBER: '300'
-} as const
+// Additional constants for other test data
+const BOUT_1 = '1';
+const USER_ID = '1';
+const BOUT_DATE = '2024-02-15';
+const BOUT_CREATED = '2024-02-15';
+const TEAM_1_FOUNDING = '2023-12-31';
+const HOME_SCORE = 120;
+const AWAY_SCORE = 105;
+const USER_EMAIL = 'test@example.com';
+const SUPABASE_URL = 'https://test.supabase.co';
+const SUPABASE_ANON_KEY = 'test-anon-key';
 
-const TEST_DATES = {
-  TEAM_1_CREATED: '2024-01-01',
-  TEAM_2_CREATED: '2024-01-02',
-  PLAYER_1_CREATED: '2024-01-01',
-  PLAYER_2_CREATED: '2024-01-02',
-  PLAYER_3_CREATED: '2024-01-03',
-  BOUT_DATE: '2024-02-15',
-  BOUT_CREATED: '2024-02-15',
-  TEAM_1_FOUNDING: '2023-12-31'
-} as const
+// Factory functions
+function createTeam(id: string, name: string, created_at: string, roster: { player_id: string, player_name: string }[]) {
+  return { id, name, created_at, roster };
+}
 
-const TEST_NAMES = {
-  TEAM_1: 'Roller Derby Team 1',
-  TEAM_2: 'Roller Derby Team 2',
-  TEST_TEAM_1: 'Test Team 1',
-  TEST_TEAM_2: 'Test Team 2',
-  PLAYER_1: 'Test Player 1',
-  PLAYER_2: 'Test Player 2',
-  PLAYER_3: 'Test Player 3',
-  ROSTER_PLAYER_1: 'Player 1',
-  ROSTER_PLAYER_2: 'Player 2',
-  ROSTER_PLAYER_3: 'Player 3'
-} as const
-
-const TEST_POSITIONS = {
-  BLOCKER: 'blocker',
-  JAMMER: 'jammer',
-  PIVOT: 'pivot'
-} as const
-
-const TEST_SCORES = {
-  HOME_SCORE: 120,
-  AWAY_SCORE: 105
-} as const
-
-const TEST_AUTH = {
-  USER_EMAIL: 'test@example.com',
-  SUPABASE_URL: 'https://test.supabase.co',
-  SUPABASE_ANON_KEY: 'test-anon-key'
-} as const
-
-// Factory functions for creating test data
-type MockPlayerTeamAssignment = {
-  number: string
-  position: string
-  is_active: boolean
-  teams: { id: string; name: string }
+function createPlayer(
+  id: string,
+  derby_name: string,
+  preferred_number: string,
+  created_at: string,
+  player_teams: { number: string, position: string, is_active: boolean, teams: { id: string, name: string } }[]
+) {
+  return { id, derby_name, preferred_number, created_at, player_teams };
 }
 
 type MockBoutTeam = {
@@ -73,28 +54,6 @@ type MockBoutTeam = {
   created_at: string
   logo_url: string | null
 }
-
-const createMockTeam = (id: string, name: string, createdAt: string, roster: Array<{ player_id: string; player_name: string }>) => ({
-  id,
-  name,
-  created_at: createdAt,
-  roster
-})
-
-const createMockPlayerTeamAssignment = (number: string, position: string, isActive: boolean, teamId: string, teamName: string): MockPlayerTeamAssignment => ({
-  number,
-  position,
-  is_active: isActive,
-  teams: { id: teamId, name: teamName }
-})
-
-const createMockPlayer = (id: string, derbyName: string, preferredNumber: string, createdAt: string, playerTeams: MockPlayerTeamAssignment[]) => ({
-  id,
-  derby_name: derbyName,
-  preferred_number: preferredNumber,
-  created_at: createdAt,
-  player_teams: playerTeams
-})
 
 const createMockBoutTeam = (id: string, name: string, createdAt: string, logoUrl: string | null = null): MockBoutTeam => ({
   id,
@@ -116,106 +75,88 @@ const createMockBout = (id: string, date: string, homeTeamId: string, awayTeamId
   away_team: awayTeam
 })
 
-// Mock data using factory functions and constants
 const mockTeams = [
-  createMockTeam(
-    TEST_IDS.TEAM_1,
-    TEST_NAMES.TEAM_1,
-    TEST_DATES.TEAM_1_CREATED,
-    [
-      { player_id: TEST_IDS.PLAYER_1, player_name: TEST_NAMES.ROSTER_PLAYER_1 },
-      { player_id: TEST_IDS.PLAYER_2, player_name: TEST_NAMES.ROSTER_PLAYER_2 }
-    ]
-  ),
-  createMockTeam(
-    TEST_IDS.TEAM_2,
-    TEST_NAMES.TEAM_2,
-    TEST_DATES.TEAM_2_CREATED,
-    [
-      { player_id: TEST_IDS.PLAYER_3, player_name: TEST_NAMES.ROSTER_PLAYER_3 }
-    ]
-  )
-]
+  createTeam(TEAM1_ID, TEAM1_NAME, '2024-01-01', [
+    { player_id: PLAYER1_ID, player_name: PLAYER1_NAME },
+    { player_id: PLAYER2_ID, player_name: PLAYER2_NAME }
+  ]),
+  createTeam(TEAM2_ID, TEAM2_NAME, '2024-01-02', [
+    { player_id: PLAYER3_ID, player_name: PLAYER3_NAME }
+  ])
+];
 
 const mockPlayers = [
-  createMockPlayer(
-    TEST_IDS.PLAYER_1,
-    TEST_NAMES.PLAYER_1,
-    TEST_NUMBERS.PLAYER_1_NUMBER,
-    TEST_DATES.PLAYER_1_CREATED,
+  createPlayer(
+    PLAYER1_ID,
+    PLAYER1_DERBY,
+    NUMBER_100,
+    '2024-01-01',
     [
-      createMockPlayerTeamAssignment(
-        TEST_NUMBERS.PLAYER_1_NUMBER,
-        TEST_POSITIONS.BLOCKER,
-        true,
-        TEST_IDS.TEAM_1,
-        TEST_NAMES.TEST_TEAM_1
-      )
+      {
+        number: NUMBER_100,
+        position: 'blocker',
+        is_active: true,
+        teams: { id: TEAM1_ID, name: TEST_TEAM1_NAME }
+      }
     ]
   ),
-  createMockPlayer(
-    TEST_IDS.PLAYER_2,
-    TEST_NAMES.PLAYER_2,
-    TEST_NUMBERS.PLAYER_2_NUMBER,
-    TEST_DATES.PLAYER_2_CREATED,
+  createPlayer(
+    PLAYER2_ID,
+    PLAYER2_DERBY,
+    NUMBER_200,
+    '2024-01-02',
     [
-      createMockPlayerTeamAssignment(
-        TEST_NUMBERS.PLAYER_2_NUMBER,
-        TEST_POSITIONS.JAMMER,
-        true,
-        TEST_IDS.TEAM_2,
-        TEST_NAMES.TEST_TEAM_2
-      )
+      {
+        number: NUMBER_200,
+        position: 'jammer',
+        is_active: true,
+        teams: { id: TEAM2_ID, name: TEST_TEAM2_NAME }
+      }
     ]
   ),
-  createMockPlayer(
-    TEST_IDS.PLAYER_3,
-    TEST_NAMES.PLAYER_3,
-    TEST_NUMBERS.PLAYER_3_NUMBER,
-    TEST_DATES.PLAYER_3_CREATED,
+  createPlayer(
+    PLAYER3_ID,
+    PLAYER3_DERBY,
+    NUMBER_300,
+    '2024-01-03',
     [
-      createMockPlayerTeamAssignment(
-        TEST_NUMBERS.PLAYER_3_NUMBER,
-        TEST_POSITIONS.PIVOT,
-        false,
-        TEST_IDS.TEAM_1,
-        TEST_NAMES.TEST_TEAM_1
-      )
+      {
+        number: NUMBER_300,
+        position: 'pivot',
+        is_active: false,
+        teams: { id: TEAM1_ID, name: TEST_TEAM1_NAME }
+      }
     ]
   )
-]
+];
 
 const mockBouts = [
   createMockBout(
-    TEST_IDS.BOUT_1,
-    TEST_DATES.BOUT_DATE,
-    TEST_IDS.TEAM_1,
-    TEST_IDS.TEAM_2,
-    TEST_SCORES.HOME_SCORE,
-    TEST_SCORES.AWAY_SCORE,
+    BOUT_1,
+    BOUT_DATE,
+    TEAM1_ID,
+    TEAM2_ID,
+    HOME_SCORE,
+    AWAY_SCORE,
     'completed',
-    TEST_DATES.BOUT_CREATED,
-    createMockBoutTeam(TEST_IDS.TEAM_1, TEST_NAMES.TEAM_1, TEST_DATES.TEAM_1_FOUNDING),
-    createMockBoutTeam(TEST_IDS.TEAM_2, TEST_NAMES.TEAM_2, TEST_DATES.TEAM_2_CREATED)
+    BOUT_CREATED,
+    createMockBoutTeam(TEAM1_ID, TEAM1_NAME, TEAM_1_FOUNDING),
+    createMockBoutTeam(TEAM2_ID, TEAM2_NAME, '2024-01-02')
   )
 ]
 
-// Mock environment variables for tests
-vi.mock('import.meta', () => ({
-  env: {
-    VITE_SUPABASE_URL: TEST_AUTH.SUPABASE_URL,
-    VITE_SUPABASE_ANON_KEY: TEST_AUTH.SUPABASE_ANON_KEY
-  }
-}))
+// Mock environment variables for tests using vi.stubEnv for better isolation
+vi.stubEnv('VITE_SUPABASE_URL', SUPABASE_URL)
+vi.stubEnv('VITE_SUPABASE_ANON_KEY', SUPABASE_ANON_KEY)
 
 // Reusable mock factory functions to eliminate duplication
 const createMockAuth = () => ({
   signUp: vi.fn(() => Promise.resolve({ 
-    data: { user: { id: TEST_IDS.USER, email: TEST_AUTH.USER_EMAIL } }, 
+    data: { user: { id: USER_ID, email: USER_EMAIL } }, 
     error: null 
   })),
   signInWithPassword: vi.fn(() => Promise.resolve({ 
-    data: { user: { id: TEST_IDS.USER, email: TEST_AUTH.USER_EMAIL } }, 
+    data: { user: { id: USER_ID, email: USER_EMAIL } }, 
     error: null 
   })),
   signOut: vi.fn(() => Promise.resolve({ error: null })),
@@ -249,6 +190,8 @@ const createMockFrom = () => vi.fn((table: string) => {
     orderBy?: { field: string; ascending: boolean }
     limitCount?: number
     error: unknown
+    shouldSimulateError?: boolean
+    errorType?: 'fetch' | 'network' | 'timeout' | 'permission'
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -309,8 +252,26 @@ const createMockFrom = () => vi.fn((table: string) => {
       })
     }
 
+    const generateError = (errorType?: string) => {
+      switch (errorType) {
+        case 'network':
+          return new Error('Network error: Failed to connect to database')
+        case 'timeout':
+          return new Error('Timeout error: Database query timed out')
+        case 'permission':
+          return new Error('Permission error: Insufficient privileges')
+        case 'fetch':
+        default:
+          return new Error('Database error: Failed to fetch data')
+      }
+    }
+
     const executeQuery = (): { data: unknown[]; error: unknown } => {
+      // Check for configured errors first
       if (state.error) return { data: [], error: state.error }
+      if (state.shouldSimulateError) {
+        return { data: [], error: generateError(state.errorType) }
+      }
       
       let result = applyFilters(state.data, state.filters)
       result = applyOrder(result, state.orderBy)
@@ -364,8 +325,25 @@ const createMockFrom = () => vi.fn((table: string) => {
           limitCount: count
         })
       }),
-      then: vi.fn((onResolve) => {
+      // Enhanced error simulation methods
+      simulateError: vi.fn((errorType: 'fetch' | 'network' | 'timeout' | 'permission' = 'fetch') => {
+        return createChainableQuery({
+          ...state,
+          shouldSimulateError: true,
+          errorType
+        })
+      }),
+      withError: vi.fn((error: unknown) => {
+        return createChainableQuery({
+          ...state,
+          error
+        })
+      }),
+      then: vi.fn((onResolve, onReject) => {
         const result = executeQuery()
+        if (result.error && onReject) {
+          return onReject(result.error)
+        }
         return onResolve(result)
       }),
       // Promise-like interface
@@ -455,6 +433,23 @@ const createMockFrom = () => vi.fn((table: string) => {
         limitCount: count,
         error: null 
       })
+    }),
+    // Error simulation methods for testing error scenarios
+    simulateError: vi.fn((errorType: 'fetch' | 'network' | 'timeout' | 'permission' = 'fetch') => {
+      return createChainableQuery({ 
+        data: [...data], 
+        filters: [], 
+        error: null,
+        shouldSimulateError: true,
+        errorType
+      })
+    }),
+    withError: vi.fn((error: unknown) => {
+      return createChainableQuery({ 
+        data: [...data], 
+        filters: [], 
+        error
+      })
     })
   }
 })
@@ -474,7 +469,7 @@ vi.mock('../lib/supabase', () => ({
 // Mock useAuth hook
 vi.mock('../hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({
-    user: { id: TEST_IDS.USER, email: TEST_AUTH.USER_EMAIL },
+    user: { id: USER_ID, email: USER_EMAIL },
     loading: false,
     session: { access_token: 'test-token' },
     signOut: vi.fn()
