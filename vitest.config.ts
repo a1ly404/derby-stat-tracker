@@ -14,5 +14,15 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: resolve(__dirname, 'src/test/setup.ts'),
     css: true,
+    // Add pool configuration to avoid jsdom issues in CI
+    pool: 'forks',
+    // Ensure proper environment isolation
+    isolate: true,
+    // Add environment options for jsdom
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable'
+      }
+    }
   },
 })

@@ -1,6 +1,43 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
+// Fix for jsdom compatibility issues in CI environments
+// Add global polyfills that jsdom might be missing
+if (typeof global !== 'undefined') {
+  // Ensure global.Map exists for webidl-conversions
+  if (!global.Map) {
+    global.Map = Map;
+  }
+  // Ensure global.Set exists
+  if (!global.Set) {
+    global.Set = Set;
+  }
+  // Ensure global.WeakMap exists
+  if (!global.WeakMap) {
+    global.WeakMap = WeakMap;
+  }
+}
+
+// Mock browser APIs that Vercel Analytics expects
+Object.defineProperty(document, 'currentScript', {
+  value: null,
+  writable: true
+});
+
+// Mock window.confirm for tests
+window.confirm = vi.fn(() => true);
+
+// Suppress Vercel Analytics errors in test environment
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  // Filter out Vercel Analytics script errors
+  if (args[0]?.includes?.('Cannot read properties of undefined (reading \'currentScript\')') ||
+      args[0]?.includes?.('va.vercel-scripts.com')) {
+    return;
+  }
+  originalConsoleError.apply(console, args);
+};
+
 // Test data constants to avoid magic numbers and duplication
 const TEAM1_ID = '1';
 const TEAM2_ID = '2';
