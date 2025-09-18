@@ -466,12 +466,15 @@ vi.mock('../lib/supabase', () => ({
   requireSupabase: vi.fn(() => createMockSupabaseClient())
 }))
 
-// Mock useAuth hook
-vi.mock('../hooks/useAuth', () => ({
-  useAuth: vi.fn(() => ({
-    user: { id: USER_ID, email: USER_EMAIL },
-    loading: false,
-    session: { access_token: 'test-token' },
-    signOut: vi.fn()
-  }))
-}))
+// Utility function for creating consistent auth mock configurations
+export const createMockAuthState = (overrides: Partial<{
+  user: { id: string; email: string } | null
+  loading: boolean
+  session: { access_token: string } | null
+  signOut: () => void
+}> = {}) => ({
+  user: overrides.user ?? { id: USER_ID, email: USER_EMAIL },
+  loading: overrides.loading ?? false,
+  session: overrides.session ?? { access_token: 'test-token' },
+  signOut: overrides.signOut ?? vi.fn()
+})

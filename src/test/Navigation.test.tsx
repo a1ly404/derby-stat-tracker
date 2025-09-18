@@ -36,7 +36,7 @@ describe('Navigation Component', () => {
     expect(mockOnViewChange).toHaveBeenCalledWith('players')
   })
 
-  // Removed brittle emoji-specific test. Navigation items are tested by their accessible text in other tests.
+  // Removed brittle emoji-specific test: emoji rendering can vary across platforms and fonts, making such tests unreliable. Navigation items are tested by their accessible text in other tests.
 
   it('shows Supabase attribution badge', () => {
     render(<Navigation activeView="dashboard" onViewChange={mockOnViewChange} />)
