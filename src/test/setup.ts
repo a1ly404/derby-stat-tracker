@@ -24,10 +24,34 @@ window.confirm = vi.fn(() => true);
 
 // Suppress Vercel Analytics errors in test environment
 const originalConsoleError = console.error;
+
+// Returns true if the string contains a URL with allowed host(s).
+function includesAllowedVercelScriptHost(text: string): boolean {
+  try {
+    // Extract all URLs from the error message (naive regex)
+    const urlRegex = /https?:\/\/[^\s'"]+/g;
+    const matches = text.match(urlRegex);
+    if (!matches) return false;
+    for (const urlCandidate of matches) {
+      try {
+        const url = new URL(urlCandidate);
+        if (url.host === 'va.vercel-scripts.com') {
+          return true;
+        }
+      } catch (e) {
+        // Not a valid URL -- skip
+      }
+    }
+  } catch (e) {
+    // Defensive: never crash
+  }
+  return false;
+}
+
 console.error = (...args) => {
   // Filter out Vercel Analytics script errors
   if (args[0]?.includes?.('Cannot read properties of undefined (reading \'currentScript\')') ||
-      args[0]?.includes?.('va.vercel-scripts.com')) {
+      (typeof args[0] === 'string' && includesAllowedVercelScriptHost(args[0]))) {
     return;
   }
   originalConsoleError.apply(console, args);
