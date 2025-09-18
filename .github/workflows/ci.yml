@@ -67,24 +67,12 @@ jobs:
   deploy:
     name: Deploy to Vercel Production
     runs-on: ubuntu-latest
-    needs: [test, build] # This ensures deployment only runs if both test and build pass
+    needs: test # This ensures deployment only runs if tests pass
     if: github.ref == 'refs/heads/main' # Only deploy from main branch
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-          path: dist/
-
-      - name: Verify build artifacts
-        run: |
-          echo "Verifying build artifacts..."
-          ls -la dist/
-          echo "Build artifacts ready for deployment"
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
@@ -92,29 +80,17 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod --prebuilt"
+          vercel-args: "--prod"
 
   deploy-preview:
     name: Deploy to Vercel Preview
     runs-on: ubuntu-latest
-    needs: [test, build] # This ensures deployment only runs if both test and build pass
+    needs: test # This ensures deployment only runs if tests pass
     if: github.ref == 'refs/heads/dev' # Only deploy preview from dev branch
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-files
-          path: dist/
-
-      - name: Verify build artifacts
-        run: |
-          echo "Verifying build artifacts..."
-          ls -la dist/
-          echo "Build artifacts ready for preview deployment"
 
       - name: Deploy to Vercel Preview
         uses: amondnet/vercel-action@v25
@@ -122,4 +98,3 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prebuilt"
