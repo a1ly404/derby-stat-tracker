@@ -196,7 +196,7 @@ const mockBouts = [
     'completed',
     TEST_DATES.BOUT_CREATED,
     createMockBoutTeam(TEST_IDS.TEAM_1, TEST_NAMES.TEAM_1, TEST_DATES.TEAM_1_FOUNDING),
-    createMockBoutTeam(TEST_IDS.TEAM_2, TEST_NAMES.TEAM_2, TEST_DATES.TEAM_1_CREATED)
+    createMockBoutTeam(TEST_IDS.TEAM_2, TEST_NAMES.TEAM_2, TEST_DATES.TEAM_2_CREATED)
   )
 ]
 
