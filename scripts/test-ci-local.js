@@ -5,14 +5,14 @@
  * This helps debug CI-specific issues locally
  */
 
+import { spawn } from 'child_process';
+
 console.log('🔧 Testing GitHub Actions workflow locally...\n');
 
 // Set environment variables similar to GitHub Actions
 process.env.NODE_OPTIONS = '--experimental-vm-modules';
 process.env.FORCE_COLOR = '0';
 process.env.CI = 'true';
-
-const { spawn } = require('child_process');
 
 async function runCommand(command, args = []) {
   return new Promise((resolve, reject) => {
