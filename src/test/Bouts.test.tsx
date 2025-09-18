@@ -82,8 +82,8 @@ describe('Bouts Component', () => {
         const addButton = screen.getByText(/schedule new bout/i)
         await user.click(addButton)
 
-        // Click cancel
-        const formCancelButton = screen.getByTestId('bout-form-cancel')
+        // Click cancel in the form actions (the secondary button)
+        const formCancelButton = screen.getAllByRole('button', { name: /cancel/i })[1]
         await user.click(formCancelButton)
 
         // Form should be hidden

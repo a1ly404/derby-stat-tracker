@@ -241,31 +241,221 @@ const createMockFrom = () => vi.fn((table: string) => {
       data = []
   }
   
-  const createChainableQuery = () => ({
-    select: vi.fn(() => createChainableQuery()),
-    order: vi.fn(() => createChainableQuery()),
-    limit: vi.fn(() => createChainableQuery()),
-    eq: vi.fn(() => createChainableQuery()),
-    then: vi.fn((onResolve) => onResolve({ data, error: null }))
-  })
+  // State tracking for query chain simulation
+  interface QueryState {
+    data: unknown[]
+    selectedFields?: string[]
+    filters: Array<{ field: string; value: unknown; operator: string }>
+    orderBy?: { field: string; ascending: boolean }
+    limitCount?: number
+    error: unknown
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const createChainableQuery = (state: QueryState = { data: [...data], filters: [], error: null }): any => {
+    const applyFilters = (data: unknown[], filters: QueryState['filters']): unknown[] => {
+      return data.filter(item => {
+        return filters.every(filter => {
+          const itemValue = (item as Record<string, unknown>)[filter.field]
+          switch (filter.operator) {
+            case 'eq':
+              return itemValue === filter.value
+            case 'neq':
+              return itemValue !== filter.value
+            case 'gt':
+              return typeof itemValue === 'number' && typeof filter.value === 'number' && itemValue > filter.value
+            case 'lt':
+              return typeof itemValue === 'number' && typeof filter.value === 'number' && itemValue < filter.value
+            default:
+              return true
+          }
+        })
+      })
+    }
+
+    const applyOrder = (data: unknown[], orderBy?: QueryState['orderBy']): unknown[] => {
+      if (!orderBy) return data
+      
+      return [...data].sort((a, b) => {
+        const aValue = (a as Record<string, unknown>)[orderBy.field]
+        const bValue = (b as Record<string, unknown>)[orderBy.field]
+        
+        // Handle null/undefined values
+        if (aValue == null && bValue == null) return 0
+        if (aValue == null) return 1
+        if (bValue == null) return -1
+        
+        if (aValue < bValue) return orderBy.ascending ? -1 : 1
+        if (aValue > bValue) return orderBy.ascending ? 1 : -1
+        return 0
+      })
+    }
+
+    const applyLimit = (data: unknown[], limit?: number): unknown[] => {
+      return limit ? data.slice(0, limit) : data
+    }
+
+    const applySelect = (data: unknown[], fields?: string[]): unknown[] => {
+      if (!fields || fields.includes('*')) return data
+      
+      return data.map(item => {
+        const selected: Record<string, unknown> = {}
+        fields.forEach(field => {
+          if (field in (item as Record<string, unknown>)) {
+            selected[field] = (item as Record<string, unknown>)[field]
+          }
+        })
+        return selected
+      })
+    }
+
+    const executeQuery = (): { data: unknown[]; error: unknown } => {
+      if (state.error) return { data: [], error: state.error }
+      
+      let result = applyFilters(state.data, state.filters)
+      result = applyOrder(result, state.orderBy)
+      result = applyLimit(result, state.limitCount)
+      result = applySelect(result, state.selectedFields)
+      
+      return { data: result, error: null }
+    }
+
+    return {
+      select: vi.fn((fields: string = '*') => {
+        const fieldArray = fields === '*' ? ['*'] : fields.split(',').map(f => f.trim())
+        return createChainableQuery({
+          ...state,
+          selectedFields: fieldArray
+        })
+      }),
+      eq: vi.fn((field: string, value: unknown) => {
+        return createChainableQuery({
+          ...state,
+          filters: [...state.filters, { field, value, operator: 'eq' }]
+        })
+      }),
+      neq: vi.fn((field: string, value: unknown) => {
+        return createChainableQuery({
+          ...state,
+          filters: [...state.filters, { field, value, operator: 'neq' }]
+        })
+      }),
+      gt: vi.fn((field: string, value: unknown) => {
+        return createChainableQuery({
+          ...state,
+          filters: [...state.filters, { field, value, operator: 'gt' }]
+        })
+      }),
+      lt: vi.fn((field: string, value: unknown) => {
+        return createChainableQuery({
+          ...state,
+          filters: [...state.filters, { field, value, operator: 'lt' }]
+        })
+      }),
+      order: vi.fn((field: string, options?: { ascending?: boolean }) => {
+        return createChainableQuery({
+          ...state,
+          orderBy: { field, ascending: options?.ascending ?? true }
+        })
+      }),
+      limit: vi.fn((count: number) => {
+        return createChainableQuery({
+          ...state,
+          limitCount: count
+        })
+      }),
+      then: vi.fn((onResolve) => {
+        const result = executeQuery()
+        return onResolve(result)
+      }),
+      // Promise-like interface
+      catch: vi.fn((onReject) => {
+        const result = executeQuery()
+        if (result.error) {
+          return onReject(result.error)
+        }
+        return Promise.resolve(result)
+      })
+    }
+  }
   
   return {
-    select: vi.fn(() => createChainableQuery()),
-    insert: vi.fn(() => ({
-      select: vi.fn(() => Promise.resolve({ 
-        data: [{ id: 'new-id', name: 'New Item' }], 
+    select: vi.fn((fields: string = '*') => {
+      const fieldArray = fields === '*' ? ['*'] : fields.split(',').map(f => f.trim())
+      return createChainableQuery({ 
+        data: [...data], 
+        selectedFields: fieldArray, 
+        filters: [], 
         error: null 
-      }))
+      })
+    }),
+    insert: vi.fn((values: unknown) => ({
+      select: vi.fn(() => {
+        if (Array.isArray(values)) {
+          return Promise.resolve({ 
+            data: values.map((item, index) => 
+              typeof item === 'object' && item !== null 
+                ? { id: `new-id-${index}`, ...item as Record<string, unknown> }
+                : { id: `new-id-${index}`, value: item }
+            ), 
+            error: null 
+          })
+        } else {
+          return Promise.resolve({ 
+            data: [typeof values === 'object' && values !== null 
+              ? { id: 'new-id', ...values as Record<string, unknown> }
+              : { id: 'new-id', value: values }
+            ], 
+            error: null 
+          })
+        }
+      })
     })),
-    update: vi.fn(() => ({
-      eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
+    update: vi.fn((values: unknown) => ({
+      eq: vi.fn((field: string, value: unknown) => {
+        // Simulate updating matching records
+        const updatedData = data.map(item => {
+          const itemRecord = item as Record<string, unknown>
+          if (itemRecord[field] === value && typeof values === 'object' && values !== null) {
+            return { ...itemRecord, ...values as Record<string, unknown> }
+          }
+          return item
+        })
+        return Promise.resolve({ data: updatedData, error: null })
+      })
     })),
     delete: vi.fn(() => ({
-      eq: vi.fn(() => Promise.resolve({ data: null, error: null }))
+      eq: vi.fn((field: string, value: unknown) => {
+        // Simulate deleting matching records
+        const remainingData = data.filter(item => 
+          (item as Record<string, unknown>)[field] !== value
+        )
+        return Promise.resolve({ data: remainingData, error: null })
+      })
     })),
-    eq: vi.fn(() => createChainableQuery()),
-    order: vi.fn(() => createChainableQuery()),
-    limit: vi.fn(() => createChainableQuery())
+    eq: vi.fn((field: string, value: unknown) => {
+      return createChainableQuery({ 
+        data: [...data], 
+        filters: [{ field, value, operator: 'eq' }], 
+        error: null 
+      })
+    }),
+    order: vi.fn((field: string, options?: { ascending?: boolean }) => {
+      return createChainableQuery({ 
+        data: [...data], 
+        filters: [], 
+        orderBy: { field, ascending: options?.ascending ?? true },
+        error: null 
+      })
+    }),
+    limit: vi.fn((count: number) => {
+      return createChainableQuery({ 
+        data: [...data], 
+        filters: [], 
+        limitCount: count,
+        error: null 
+      })
+    })
   }
 })
 
