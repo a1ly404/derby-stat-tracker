@@ -35,7 +35,6 @@ jobs:
 
       - name: Generate test coverage
         run: npm run test:coverage
-        continue-on-error: true # Don't fail if coverage generation has issues
 
       - name: Test results
         run: echo "✅ All tests passed! Ready for deployment."
