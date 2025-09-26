@@ -1,0 +1,131 @@
+.stat-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 6px;
+  padding: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.stat-button:hover:not(.disabled) {
+  border-color: #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
+}
+
+.stat-button.disabled {
+  opacity: 0.6;
+  background: #f8f9fa;
+}
+
+.stat-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.stat-icon {
+  font-size: 1rem;
+  width: 24px;
+  text-align: center;
+}
+
+.stat-details {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #34495e;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.stat-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.control-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.control-btn:hover:not(:disabled) {
+  border-color: #3498db;
+  background: #3498db;
+  color: white;
+}
+
+.control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.control-btn.increment {
+  color: #27ae60;
+}
+
+.control-btn.increment:hover:not(:disabled) {
+  background: #27ae60;
+  border-color: #27ae60;
+}
+
+.control-btn.decrement {
+  color: #e74c3c;
+}
+
+.control-btn.decrement:hover:not(:disabled) {
+  background: #e74c3c;
+  border-color: #e74c3c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .stat-button {
+    padding: 0.5rem;
+  }
+  
+  .stat-info {
+    gap: 0.5rem;
+  }
+  
+  .stat-icon {
+    font-size: 1rem;
+    width: 20px;
+  }
+  
+  .stat-label {
+    font-size: 0.75rem;
+  }
+  
+  .stat-value {
+    font-size: 1.25rem;
+  }
+  
+  .control-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+}

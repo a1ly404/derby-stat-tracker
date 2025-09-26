@@ -1,7 +1,7 @@
 import './Navigation.css'
 import { getNavigationEmoji } from '../utils/emojis'
 
-type ActiveView = 'dashboard' | 'players' | 'bouts' | 'teams' | 'settings'
+type ActiveView = 'dashboard' | 'players' | 'bouts' | 'teams' | 'settings' | 'live-track'
 
 interface NavigationProps {
   activeView: ActiveView
@@ -14,6 +14,7 @@ const Navigation = ({ activeView, onViewChange }: NavigationProps) => {
     { id: 'players' as ActiveView, label: 'Players', icon: getNavigationEmoji('players') },
     { id: 'bouts' as ActiveView, label: 'Bouts', icon: getNavigationEmoji('bouts') },
     { id: 'teams' as ActiveView, label: 'Teams', icon: getNavigationEmoji('teams') },
+    { id: 'live-track' as ActiveView, label: 'Live Track', icon: '📊' },
     { id: 'settings' as ActiveView, label: 'Settings', icon: getNavigationEmoji('settings') },
   ]
 

@@ -1,0 +1,269 @@
+.jam-lineup-selector {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.selector-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 2rem;
+}
+
+.selector-header h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.selector-header p {
+  opacity: 0.9;
+  font-size: 0.875rem;
+}
+
+.teams-selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1000px;
+  width: 100%;
+}
+
+.team-selection {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.team-selection h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.lineup-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 50px;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 2px dashed #dee2e6;
+}
+
+.lineup-player {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.available-players {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: #f8f9fa;
+}
+
+.available-players::-webkit-scrollbar {
+  width: 8px;
+}
+
+.available-players::-webkit-scrollbar-track {
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.available-players::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+.available-players::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
+}
+
+.scroll-hint {
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-style: italic;
+  padding: 0.5rem;
+  background: #e9ecef;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.no-players {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  padding: 1rem;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+.player-option {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.player-option:hover:not(.disabled) {
+  border-color: #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.player-option.selected {
+  border-color: #27ae60;
+  background: #d5f4e6;
+}
+
+.player-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.position-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.player-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.player-number {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.player-name {
+  font-size: 0.75rem;
+  color: #34495e;
+}
+
+.player-position {
+  font-size: 0.675rem;
+  color: #7f8c8d;
+  text-transform: capitalize;
+}
+
+.selector-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancel-btn, .start-jam-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.cancel-btn {
+  background: #95a5a6;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #7f8c8d;
+}
+
+.start-jam-btn {
+  background: #27ae60;
+  color: white;
+}
+
+.start-jam-btn:hover:not(:disabled) {
+  background: #219a52;
+}
+
+.start-jam-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.validation-message {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .teams-selection {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .team-selection {
+    padding: 1rem;
+  }
+  
+  .selector-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .cancel-btn, .start-jam-btn {
+    width: 100%;
+  }
+}
