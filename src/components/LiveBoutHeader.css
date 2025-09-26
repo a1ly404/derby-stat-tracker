@@ -1,0 +1,319 @@
+.live-bout-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+  padding: 0.75rem 1rem;
+  margin: -1rem -1rem 1rem -1rem;
+  border-radius: 0 0 8px 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.live-bout-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bout-basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.teams-summary {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.scores {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.jam-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.jam-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+}
+
+.jam-number {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.jam-timer {
+  font-family: 'Courier New', monospace;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #f39c12;
+  min-width: 50px;
+  text-align: center;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.active {
+  background: #2ecc71;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.inactive {
+  background: #95a5a6;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.jam-number {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.jam-timer {
+  font-family: 'Courier New', monospace;
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #f39c12;
+}
+
+.jam-btn {
+  background: rgba(255, 255, 255, 0.9);
+  color: #2c3e50;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.jam-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.jam-btn:active {
+  transform: translateY(0);
+}
+
+.jam-btn.start {
+  background: rgba(46, 204, 113, 0.9);
+  color: white;
+}
+
+.jam-btn.start:hover {
+  background: #27ae60;
+}
+
+.bout-end-btn {
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  margin-left: 0.5rem;
+}
+
+.bout-end-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bout-end-btn:active {
+  transform: translateY(0);
+}
+
+.jam-btn.end {
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+}
+
+.jam-btn.end:hover {
+  background: #c0392b;
+}
+
+.jam-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.jam-btn:disabled:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-content h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.modal-content p {
+  color: #7f8c8d;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.modal-btn.confirm {
+  background: #e74c3c;
+  color: white;
+}
+
+.modal-btn.confirm:hover {
+  background: #c0392b;
+}
+
+.modal-btn.cancel {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.modal-btn.cancel:hover {
+  background: #bdc3c7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .live-bout-header {
+    padding: 0.5rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .teams-summary {
+    font-size: 0.875rem;
+  }
+  
+  .scores {
+    font-size: 1.25rem;
+  }
+  
+  .jam-controls {
+    gap: 0.5rem;
+  }
+  
+  .jam-info {
+    padding: 0.375rem 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .jam-number {
+    font-size: 0.75rem;
+  }
+  
+  .jam-timer {
+    font-size: 1rem;
+  }
+  
+  .jam-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
