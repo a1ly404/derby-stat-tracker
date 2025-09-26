@@ -18,9 +18,10 @@ interface ExtendedPlayer extends Player {
 
 interface LiveStatTrackerProps {
   boutId?: string | null
+  onNavigateBack?: () => void
 }
 
-const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId }) => {
+const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId, onNavigateBack }) => {
   const [bout, setBout] = useState<(Bout & { home_team: Team; away_team: Team }) | null>(null)
   const [homeTeamPlayers, setHomeTeamPlayers] = useState<ExtendedPlayer[]>([])
   const [awayTeamPlayers, setAwayTeamPlayers] = useState<ExtendedPlayer[]>([])
@@ -384,6 +385,13 @@ const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId }) => {
     }
   }
 
+  const handleBackToBouts = () => {
+    // Navigate back to bout selection via parent component
+    if (onNavigateBack) {
+      onNavigateBack()
+    }
+  }
+
   const handleNewBout = () => {
     // Reset all state for a new bout
     setIsBoutComplete(false)
@@ -392,9 +400,13 @@ const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId }) => {
     setShowLineupSelector(true)
     setPlayerStats(new Map())
     setJamPointsScored(new Map())
+    setStatsInitialized(false)
     setBout(null)
-    // Navigate back or reload - depending on your routing setup
-    window.location.reload()
+    setError('')
+    setLoading(false)
+    
+    // Navigate back to bout selection via parent component
+    handleBackToBouts()
   }
 
   const cancelLineupSelection = () => {
@@ -451,6 +463,7 @@ const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId }) => {
         awayTeamPlayers={awayTeamPlayers}
         playerStats={playerStats}
         onNewBout={handleNewBout}
+        onBackToBouts={handleBackToBouts}
       />
     )
   }

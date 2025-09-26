@@ -18,6 +18,7 @@ interface BoutSummaryProps {
   awayTeamPlayers: ExtendedPlayer[]
   playerStats: Map<string, PlayerStats>
   onNewBout: () => void
+  onBackToBouts: () => void
 }
 
 const BoutSummary: React.FC<BoutSummaryProps> = ({
@@ -25,7 +26,8 @@ const BoutSummary: React.FC<BoutSummaryProps> = ({
   homeTeamPlayers,
   awayTeamPlayers,
   playerStats,
-  onNewBout
+  onNewBout,
+  onBackToBouts
 }) => {
   const homeScore = bout.home_score || 0
   const awayScore = bout.away_score || 0
@@ -140,7 +142,7 @@ const BoutSummary: React.FC<BoutSummaryProps> = ({
         <button onClick={onNewBout} className="new-bout-btn">
           Start New Bout
         </button>
-        <button onClick={() => window.history.back()} className="back-to-bouts-btn">
+        <button onClick={onBackToBouts} className="back-to-bouts-btn">
           Back to Bouts
         </button>
       </div>

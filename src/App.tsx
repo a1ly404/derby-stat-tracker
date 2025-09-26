@@ -29,6 +29,11 @@ function App() {
     setActiveView('live-track')
   }
 
+  const handleNavigateBackToBouts = () => {
+    setSelectedBoutId(null)
+    setActiveView('bouts')
+  }
+
   // Check for configuration errors early - if Supabase is not configured, show error
   if (!isSupabaseConfigured) {
     return <ConfigurationError error="Missing Supabase environment variables" />
@@ -58,7 +63,12 @@ function App() {
           {activeView === 'players' && <Players />}
           {activeView === 'bouts' && <Bouts onStartLiveTracking={handleStartLiveTracking} />}
           {activeView === 'teams' && <Teams />}
-          {activeView === 'live-track' && <LiveStatTracker boutId={selectedBoutId} />}
+          {activeView === 'live-track' && (
+            <LiveStatTracker 
+              boutId={selectedBoutId} 
+              onNavigateBack={handleNavigateBackToBouts}
+            />
+          )}
           {activeView === 'settings' && <div className="view-placeholder">Settings - Coming Soon</div>}
           <Analytics />
           <SpeedInsights />
