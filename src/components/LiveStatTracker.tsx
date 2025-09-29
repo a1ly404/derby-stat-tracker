@@ -121,8 +121,23 @@ const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId, onNavigateBac
         }
       }).filter(Boolean) as ExtendedPlayer[] || []
 
+      // Ensure no player appears on both teams for this bout
+      const homePlayerIds = new Set(homePlayersData.map(p => p.id))
+      const awayPlayerIds = new Set(awayPlayersData.map(p => p.id))
+      
+      // Find any players that appear on both teams
+      const duplicatePlayerIds = [...homePlayerIds].filter(id => awayPlayerIds.has(id))
+      
+      if (duplicatePlayerIds.length > 0) {
+        console.warn('Warning: Players found on both teams for this bout:', duplicatePlayerIds)
+        // For now, we'll prioritize home team assignment, but this should be addressed in data management
+        const filteredAwayPlayers = awayPlayersData.filter(p => !homePlayerIds.has(p.id))
+        setAwayTeamPlayers(filteredAwayPlayers)
+      } else {
+        setAwayTeamPlayers(awayPlayersData)
+      }
+      
       setHomeTeamPlayers(homePlayersData)
-      setAwayTeamPlayers(awayPlayersData)
     } catch (err) {
       console.error('Error fetching team players:', err)
       setError('Failed to load team players')
@@ -140,7 +155,12 @@ const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId, onNavigateBac
   const initializePlayerStats = useCallback(async () => {
     if (!bout) return
 
-    const allPlayers = [...homeTeamPlayers, ...awayTeamPlayers]
+    // Deduplicate players by ID to avoid conflicts
+    const allPlayersMap = new Map<string, ExtendedPlayer>()
+    homeTeamPlayers.forEach(player => allPlayersMap.set(player.id, player))
+    awayTeamPlayers.forEach(player => allPlayersMap.set(player.id, player))
+    const allPlayers = Array.from(allPlayersMap.values())
+    
     const statsMap = new Map<string, PlayerStats>()
 
     // Try to fetch existing stats for this bout
