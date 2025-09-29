@@ -34,7 +34,11 @@ interface BoutFormData {
     notes: string
 }
 
-const Bouts: React.FC = () => {
+interface BoutsProps {
+    onStartLiveTracking?: (boutId: string) => void
+}
+
+const Bouts: React.FC<BoutsProps> = ({ onStartLiveTracking }) => {
     const [bouts, setBouts] = useState<BoutWithTeams[]>([])
     const [teams, setTeams] = useState<Team[]>([])
     const [loading, setLoading] = useState(true)
@@ -392,6 +396,15 @@ const Bouts: React.FC = () => {
                                     {bout.status.replace('_', ' ').toUpperCase()}
                                 </div>
                                 <div className="bout-actions">
+                                    {(bout.status === 'scheduled' || bout.status === 'in_progress') && onStartLiveTracking && (
+                                        <button
+                                            onClick={() => onStartLiveTracking(bout.id)}
+                                            className="btn btn-sm btn-primary"
+                                            style={{ marginRight: '0.5rem' }}
+                                        >
+                                            📊 Live Track
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => handleEdit(bout)}
                                         className="btn btn-sm btn-secondary"

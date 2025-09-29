@@ -250,8 +250,21 @@ const createMockFrom = () => vi.fn((table: string) => {
     errorType?: 'fetch' | 'network' | 'timeout' | 'permission'
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const createChainableQuery = (state: QueryState = { data: [...data], filters: [], error: null }): any => {
+  interface ChainableQuery {
+    select: ReturnType<typeof vi.fn>
+    eq: ReturnType<typeof vi.fn>
+    neq: ReturnType<typeof vi.fn>
+    gt: ReturnType<typeof vi.fn>
+    lt: ReturnType<typeof vi.fn>
+    order: ReturnType<typeof vi.fn>
+    limit: ReturnType<typeof vi.fn>
+    simulateError: ReturnType<typeof vi.fn>
+    withError: ReturnType<typeof vi.fn>
+    then: ReturnType<typeof vi.fn>
+    catch: ReturnType<typeof vi.fn>
+  }
+
+  const createChainableQuery = (state: QueryState = { data: [...data], filters: [], error: null }): ChainableQuery => {
     const applyFilters = (data: unknown[], filters: QueryState['filters']): unknown[] => {
       return data.filter(item => {
         return filters.every(filter => {
