@@ -30,7 +30,7 @@ const LiveBoutHeader: React.FC<LiveBoutHeaderProps> = ({
     if (isJamActive && timeRemaining > 0) {
       interval = setInterval(() => {
         setTimeRemaining(prev => {
-          if (prev <= 1) {
+          if (prev <= 0) {
             onEndJam() // Auto-end jam when timer reaches 0
             return 120 // Reset for next jam
           }

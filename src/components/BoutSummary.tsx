@@ -1,13 +1,7 @@
 import React from 'react'
-import type { Bout, Team, Player, PlayerStats } from '../lib/supabase'
+import type { Bout, Team, PlayerStats } from '../lib/supabase'
+import type { ExtendedPlayer } from '../types'
 import './BoutSummary.css'
-
-interface ExtendedPlayer extends Player {
-  position?: string
-  team_number?: string
-  is_active?: boolean
-  team_id?: string
-}
 
 interface BoutSummaryProps {
   bout: Bout & {

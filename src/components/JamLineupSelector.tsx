@@ -1,13 +1,6 @@
 import { useState } from 'react'
-import type { Player } from '../lib/supabase'
+import type { ExtendedPlayer } from '../types'
 import './JamLineupSelector.css'
-
-interface ExtendedPlayer extends Player {
-  position: string
-  team_number: string
-  is_active: boolean
-  team_id: string
-}
 
 interface JamLineupSelectorProps {
   homeTeamPlayers: ExtendedPlayer[]
@@ -75,8 +68,8 @@ const JamLineupSelector: React.FC<JamLineupSelectorProps> = ({
           <h3>Home Team ({homeLineup.length}/5)</h3>
           <div className="lineup-display">
             {homeLineup.map(player => (
-              <span key={player.id} className="lineup-player" style={{backgroundColor: getPositionColor(player.position)}}>
-                {getPositionEmoji(player.position)} #{player.team_number}
+              <span key={player.id} className="lineup-player" style={{backgroundColor: getPositionColor(player.position || 'Unknown')}}>
+                {getPositionEmoji(player.position || 'Unknown')} #{player.team_number}
               </span>
             ))}
           </div>
@@ -93,13 +86,13 @@ const JamLineupSelector: React.FC<JamLineupSelectorProps> = ({
                     disabled={!canSelect && !isSelected}
                   >
                     <div className="player-info">
-                      <span className="position-indicator" style={{backgroundColor: getPositionColor(player.position)}}>
-                        {getPositionEmoji(player.position)}
+                      <span className="position-indicator" style={{backgroundColor: getPositionColor(player.position || 'Unknown')}}>
+                        {getPositionEmoji(player.position || 'Unknown')}
                       </span>
                       <div className="player-details">
                         <span className="player-number">#{player.team_number}</span>
                         <span className="player-name">{player.derby_name}</span>
-                        <span className="player-position">{player.position}</span>
+                        <span className="player-position">{player.position || 'Unknown'}</span>
                       </div>
                     </div>
                   </button>
@@ -118,8 +111,8 @@ const JamLineupSelector: React.FC<JamLineupSelectorProps> = ({
           <h3>Away Team ({awayLineup.length}/5)</h3>
           <div className="lineup-display">
             {awayLineup.map(player => (
-              <span key={player.id} className="lineup-player" style={{backgroundColor: getPositionColor(player.position)}}>
-                {getPositionEmoji(player.position)} #{player.team_number}
+              <span key={player.id} className="lineup-player" style={{backgroundColor: getPositionColor(player.position || 'Unknown')}}>
+                {getPositionEmoji(player.position || 'Unknown')} #{player.team_number}
               </span>
             ))}
           </div>
@@ -136,13 +129,13 @@ const JamLineupSelector: React.FC<JamLineupSelectorProps> = ({
                     disabled={!canSelect && !isSelected}
                   >
                     <div className="player-info">
-                      <span className="position-indicator" style={{backgroundColor: getPositionColor(player.position)}}>
-                        {getPositionEmoji(player.position)}
+                      <span className="position-indicator" style={{backgroundColor: getPositionColor(player.position || 'Unknown')}}>
+                        {getPositionEmoji(player.position || 'Unknown')}
                       </span>
                       <div className="player-details">
                         <span className="player-number">#{player.team_number}</span>
                         <span className="player-name">{player.derby_name}</span>
-                        <span className="player-position">{player.position}</span>
+                        <span className="player-position">{player.position || 'Unknown'}</span>
                       </div>
                     </div>
                   </button>

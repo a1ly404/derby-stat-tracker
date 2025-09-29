@@ -1,18 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { requireSupabase } from '../lib/supabase'
-import type { Bout, Player, PlayerStats, Team } from '../lib/supabase'
+import type { Bout, PlayerStats, Team } from '../lib/supabase'
+import type { ExtendedPlayer } from '../types'
 import PlayerStatCard from './PlayerStatCard'
 import LiveBoutHeader from './LiveBoutHeader'
 import JamLineupSelector from './JamLineupSelector'
 import BoutSummary from './BoutSummary'
 import './LiveStatTracker.css'
-
-interface ExtendedPlayer extends Player {
-  position: string
-  team_number: string
-  is_active: boolean
-  team_id: string
-}
 
 
 
@@ -190,7 +184,7 @@ const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId, onNavigateBac
           .from('player_stats')
           .upsert(playersNeedingStats, { 
             onConflict: 'player_id,bout_id',
-            ignoreDuplicates: false 
+            ignoreDuplicates: true 
           })
           .select()
 

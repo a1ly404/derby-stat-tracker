@@ -1,14 +1,8 @@
 import { useState } from 'react'
-import type { Player, PlayerStats } from '../lib/supabase'
+import type { PlayerStats } from '../lib/supabase'
+import type { ExtendedPlayer } from '../types'
 import StatButton from './StatButton'
 import './PlayerStatCard.css'
-
-interface ExtendedPlayer extends Player {
-  position?: string
-  team_number?: string
-  is_active?: boolean
-  team_id?: string
-}
 
 interface PlayerStatCardProps {
   player: ExtendedPlayer
@@ -43,8 +37,6 @@ const PlayerStatCard: React.FC<PlayerStatCardProps> = ({
         return '#95a5a6'
     }
   }
-
-
 
   return (
     <div 
