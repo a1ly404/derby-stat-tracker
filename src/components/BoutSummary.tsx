@@ -3,6 +3,15 @@ import type { Bout, Team, PlayerStats } from '../lib/supabase'
 import type { ExtendedPlayer } from '../types'
 import './BoutSummary.css'
 
+const DEFAULT_PLAYER_STATS = {
+  jams_played: 0,
+  lead_jammer: 0,
+  points_scored: 0,
+  penalties: 0,
+  blocks: 0,
+  assists: 0
+} as const
+
 interface BoutSummaryProps {
   bout: Bout & {
     home_team: Team
@@ -28,14 +37,7 @@ const BoutSummary: React.FC<BoutSummaryProps> = ({
   const winningTeam = homeScore > awayScore ? bout.home_team : awayScore > homeScore ? bout.away_team : null
 
   const getPlayerStats = (playerId: string) => {
-    return playerStats.get(playerId) || {
-      jams_played: 0,
-      lead_jammer: 0,
-      points_scored: 0,
-      penalties: 0,
-      blocks: 0,
-      assists: 0
-    }
+    return playerStats.get(playerId) || DEFAULT_PLAYER_STATS
   }
 
   const PlayerStatsSummary = ({ player }: { player: ExtendedPlayer }) => {

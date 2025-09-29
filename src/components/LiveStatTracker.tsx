@@ -8,8 +8,6 @@ import JamLineupSelector from './JamLineupSelector'
 import BoutSummary from './BoutSummary'
 import './LiveStatTracker.css'
 
-
-
 interface LiveStatTrackerProps {
   boutId?: string | null
   onNavigateBack?: () => void
