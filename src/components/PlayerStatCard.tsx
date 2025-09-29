@@ -26,8 +26,6 @@ const PlayerStatCard: React.FC<PlayerStatCardProps> = ({
   const [isExpanded, setIsExpanded] = useState(false)
   const [pivotHasStar, setPivotHasStar] = useState(false)
 
-
-  
   const handleLeadJammerToggle = () => {
     const currentValue = stats?.lead_jammer || 0
     onStatUpdate('lead_jammer', currentValue > 0 ? -currentValue : 1)

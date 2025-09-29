@@ -1,7 +1,6 @@
 import './Navigation.css'
 import { getNavigationEmoji } from '../utils/emojis'
-
-type ActiveView = 'dashboard' | 'players' | 'bouts' | 'teams' | 'settings' | 'live-track'
+import { ActiveView } from '../types'
 
 interface NavigationProps {
   activeView: ActiveView

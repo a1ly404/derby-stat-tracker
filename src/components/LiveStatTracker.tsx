@@ -242,10 +242,11 @@ const LiveStatTracker: React.FC<LiveStatTrackerProps> = ({ boutId, onNavigateBac
 
     // Track points scored during jam, but don't update bout score until jam ends
     if (statType === 'points_scored' && delta !== 0 && isJamActive) {
-      const currentJamPoints = jamPointsScored.get(playerId) || 0
-      const newJamPoints = new Map(jamPointsScored)
-      newJamPoints.set(playerId, currentJamPoints + delta)
-      setJamPointsScored(newJamPoints)
+      setJamPointsScored(prevJamPoints => {
+        const newJamPoints = new Map(prevJamPoints)
+        newJamPoints.set(playerId, (prevJamPoints.get(playerId) || 0) + delta)
+        return newJamPoints
+      })
     }
 
     // Update database - we should always have an ID now
