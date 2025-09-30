@@ -26,3 +26,11 @@ dist-ssr
 *.tsbuildinfo
 coverage/*
 !coverage/.tmp
+
+# Lighthouse CI output directories
+.lighthouseci/
+.lighthouseci-local/
+
+# Debug files
+*debug*.png
+*debug*.cjs

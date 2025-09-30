@@ -1,0 +1,56 @@
+name: Lighthouse CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    lighthouse:
+        name: Lighthouse Performance Audit
+        runs-on: ubuntu-latest
+
+        env:
+            LHCI_GITHUB_APP_TOKEN: ${{ secrets.LCHI_GITHUB_APP_TOKEN }}
+            LIGHTHOUSE_TEST_EMAIL: ${{ secrets.LIGHTHOUSE_TEST_EMAIL }}
+            LIGHTHOUSE_TEST_PASSWORD: ${{ secrets.LIGHTHOUSE_TEST_PASSWORD }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  # Fetch more history for better Lighthouse CI comparisons
+                  fetch-depth: 2
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Puppeteer
+              run: npm install puppeteer
+
+            - name: Install Lighthouse CI
+              run: npm install -g @lhci/cli@0.12.x
+
+            - name: Run Lighthouse CI
+              run: lhci autorun --config=lighthouse/lighthouserc.cjs
+              env:
+                  # Ensure GitHub token is available for status checks
+                  LHCI_GITHUB_APP_TOKEN: ${{ secrets.LCHI_GITHUB_APP_TOKEN }}
+                  # Authentication credentials for Puppeteer
+                  LIGHTHOUSE_TEST_EMAIL: ${{ secrets.LIGHTHOUSE_TEST_EMAIL }}
+                  LIGHTHOUSE_TEST_PASSWORD: ${{ secrets.LIGHTHOUSE_TEST_PASSWORD }}
+
+            - name: Upload Lighthouse results
+              uses: actions/upload-artifact@v4
+              if: always() # Upload results even if Lighthouse assertions fail
+              with:
+                  name: lighthouse-results
+                  path: .lighthouseci/
+                  retention-days: 30
