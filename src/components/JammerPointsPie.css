@@ -1,0 +1,67 @@
+.jammer-pie {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  margin: 12px 0;
+}
+
+.pie-title {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pie-and-legend {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pie-svg {
+  flex: 0 0 auto;
+}
+
+.pie-center-text {
+  font-size: 1.1rem;
+  fill: #333;
+  font-weight: 700;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.legend-label {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.legend-value {
+  margin-left: 8px;
+  font-weight: 700;
+  color: #222;
+}
+
+.no-data {
+  padding: 12px;
+  color: #666;
+  font-style: italic;
+}

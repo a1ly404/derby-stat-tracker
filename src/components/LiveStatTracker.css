@@ -8,7 +8,10 @@
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 100vh;
+  padding-bottom: 300px; /* Extra space for dropdowns */
 }
 
 .live-tracker-loading,

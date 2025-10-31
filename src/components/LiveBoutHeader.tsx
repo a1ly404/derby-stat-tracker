@@ -79,7 +79,7 @@ const LiveBoutHeader: React.FC<LiveBoutHeaderProps> = ({
             className={`jam-btn ${isJamActive ? 'end' : 'start'}`}
             onClick={isJamActive ? handleEndJam : handleStartJam}
           >
-            {isJamActive ? 'End' : 'Start'}
+            {isJamActive ? 'End Jam' : 'Start Jam'}
           </button>
           
           <button 

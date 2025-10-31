@@ -1,0 +1,47 @@
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.searchable-options {
+  position: absolute;
+  min-height: 100px;
+  max-height: 200px;
+  overflow: auto;
+  background: white;
+  border: 1px solid #eee;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  border-radius: 4px;
+  z-index: 10000;
+  padding: 6px 0;
+  list-style: none;
+  padding-bottom: 50px;
+  width: 100%;
+}
+
+.searchable-option {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.searchable-option:hover,
+.searchable-option.focused {
+  background: #f5f8ff;
+}
+
+.searchable-option.selected {
+  font-weight: 700;
+}
+
+.no-options {
+  padding: 8px 12px;
+  color: #666;
+}

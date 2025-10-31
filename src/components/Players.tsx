@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { requireSupabase } from '../lib/supabase'
 import type { Player, Team } from '../lib/supabase'
 import './Players.css'
+import SearchableSelect from './SearchableSelect'
 
 interface PlayerWithTeams extends Player {
     teams: Array<{
@@ -338,16 +339,13 @@ const Players: React.FC = () => {
                             {formData.selectedTeams.map((assignment, index) => (
                                 <div key={index} className="team-assignment">
                                     <div className="assignment-row">
-                                        <select
+                                        <SearchableSelect
+                                            options={teams.map(t => ({ value: t.id, label: t.name }))}
                                             value={assignment.team_id}
-                                            onChange={(e) => updateTeamAssignment(index, 'team_id', e.target.value)}
+                                            placeholder="Select Team"
+                                            onChange={(val) => updateTeamAssignment(index, 'team_id', val)}
                                             required
-                                        >
-                                            <option value="">Select Team</option>
-                                            {teams.map(team => (
-                                                <option key={team.id} value={team.id}>{team.name}</option>
-                                            ))}
-                                        </select>
+                                        />
 
                                         <input
                                             type="text"

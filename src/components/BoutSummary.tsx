@@ -2,6 +2,7 @@ import React from 'react'
 import type { Bout, Team, PlayerStats } from '../lib/supabase'
 import type { ExtendedPlayer } from '../types'
 import './BoutSummary.css'
+import JammerPointsPie from './JammerPointsPie'
 
 const DEFAULT_PLAYER_STATS = {
   jams_played: 0,
@@ -106,6 +107,16 @@ const BoutSummary: React.FC<BoutSummaryProps> = ({
             🤝 It's a Tie!
           </div>
         )}
+      </div>
+
+      {/* Show jammer points pies for both teams */}
+      <div className="summary-pies" style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+        <div style={{ flex: 1 }}>
+          <JammerPointsPie teamName={bout.home_team.name} players={homeTeamPlayers} playerStats={playerStats} />
+        </div>
+        <div style={{ width: 320 }}>
+          <JammerPointsPie teamName={bout.away_team.name} players={awayTeamPlayers} playerStats={playerStats} />
+        </div>
       </div>
 
       <div className="teams-stats">
