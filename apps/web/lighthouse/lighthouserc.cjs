@@ -6,7 +6,7 @@ module.exports = {
         'https://derby.razzormail.com' // Dashboard/Home (SPA handles routing client-side)
       ],
       // Use Puppeteer for authentication before testing
-      puppeteerScript: './lighthouse-auth.cjs',
+      puppeteerScript: './lighthouse/lighthouse-auth.cjs',
       // Puppeteer launch options
       puppeteerLaunchOptions: {
         headless: 'new', // Use new headless mode to avoid deprecation warnings
@@ -35,17 +35,17 @@ module.exports = {
         'categories:accessibility': ['error', { minScore: 0.9 }], // High accessibility standard
         'categories:best-practices': ['warn', { minScore: 0.9 }],
         'categories:seo': ['warn', { minScore: 0.8 }],
-        
+
         // Core Web Vitals - adjusted for SPA
         'first-contentful-paint': ['warn', { maxNumericValue: 2500 }],
         'largest-contentful-paint': ['warn', { maxNumericValue: 4500 }],
         'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
         'speed-index': ['warn', { maxNumericValue: 4000 }],
-        
+
         // Other important metrics
         'total-blocking-time': ['warn', { maxNumericValue: 300 }],
         'interactive': ['warn', { maxNumericValue: 5000 }],
-        
+
         // Security and best practices
         'errors-in-console': 'warn', // Monitor console errors in production
         'uses-https': ['error', { minScore: 1 }], // Ensure HTTPS is used
