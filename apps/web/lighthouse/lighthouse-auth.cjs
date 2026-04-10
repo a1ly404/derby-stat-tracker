@@ -4,13 +4,11 @@
  * It checks if already authenticated and skips login if so
  */
 
-const puppeteer = require('puppeteer');
-
 module.exports = async (browser, context) => {
   // Get authentication credentials from environment variables
   const email = process.env.LIGHTHOUSE_TEST_EMAIL;
   const password = process.env.LIGHTHOUSE_TEST_PASSWORD;
-  
+
   if (!email || !password) {
     throw new Error(
       'Authentication credentials not found. Please set LIGHTHOUSE_TEST_EMAIL and LIGHTHOUSE_TEST_PASSWORD environment variables.'
@@ -18,10 +16,10 @@ module.exports = async (browser, context) => {
   }
 
   console.log('🔐 Starting authentication process...');
-  
+
   // Create a new page for authentication
   const page = await browser.newPage();
-  
+
   try {
     // Navigate to the main site
     console.log('📱 Navigating to main site...');
@@ -37,7 +35,7 @@ module.exports = async (browser, context) => {
     const isAlreadyLoggedIn = await page.evaluate(() => {
       // Look for authenticated indicators (sign out button, nav items, etc.)
       return !!(
-        document.querySelector('.sign-out-btn') || 
+        document.querySelector('.sign-out-btn') ||
         document.querySelector('button[class*="sign-out"]') ||
         document.querySelector('.nav-item')
       );
@@ -45,7 +43,7 @@ module.exports = async (browser, context) => {
 
     if (isAlreadyLoggedIn) {
       console.log('✅ Already authenticated! Skipping login process.');
-      
+
       // Store current authentication state for Lighthouse
       const cookies = await page.cookies();
       const localStorage = await page.evaluate(() => {
@@ -59,19 +57,19 @@ module.exports = async (browser, context) => {
 
       context.cookies = cookies;
       context.localStorage = localStorage;
-      
+
       console.log(`🍪 Stored ${cookies.length} cookies for Lighthouse`);
       console.log(`💾 Stored ${Object.keys(localStorage).length} localStorage items`);
-      
+
       return; // Exit early - already authenticated
     }
 
     // Need to authenticate - look for Sign In button
     console.log('🔐 Not authenticated - proceeding with login...');
-    
+
     // Wait for page to load completely
     await page.waitForTimeout(2000);
-    
+
     // Look for and click the Sign In button
     console.log('🔍 Looking for Sign In button...');
     const signInClicked = await page.evaluate(() => {
@@ -91,7 +89,7 @@ module.exports = async (browser, context) => {
     }
 
     console.log('✅ Clicked Sign In button');
-    
+
     // Wait for login modal to appear
     await page.waitForTimeout(2000);
 
@@ -118,7 +116,7 @@ module.exports = async (browser, context) => {
     // Verify login success by checking for authenticated elements
     const loginSuccess = await page.evaluate(() => {
       return !!(
-        document.querySelector('.sign-out-btn') || 
+        document.querySelector('.sign-out-btn') ||
         document.querySelector('button[class*="sign-out"]') ||
         document.querySelector('.nav-item')
       );
