@@ -22,7 +22,8 @@
     "bridge:start": "npm run start --workspace=services/live-bridge",
     "tracker:dev": "npm run dev --workspace=apps/live-tracker",
     "tracker:build": "npm run build --workspace=apps/live-tracker",
-    "tracker:preview": "npm run preview --workspace=apps/live-tracker"
+    "tracker:preview": "npm run preview --workspace=apps/live-tracker",
+    "sync:api-types": "node scripts/sync-api-types.mjs"
   },
   "engines": {
     "node": ">=20.0.0",

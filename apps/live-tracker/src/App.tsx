@@ -5,10 +5,10 @@ import { Input } from './components/ui/input'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
 import { Separator } from './components/ui/separator'
-import { Switch } from './components/ui/switch'
 import { Label } from './components/ui/label'
-import { Plus, Timer, WifiHigh, WifiSlash, Coffee } from '@phosphor-icons/react'
+import { Plus, Timer, WifiHigh, WifiSlash, Coffee, FloppyDisk, Stop } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import type { LiveState, TeamState } from './types/scoreboard-api'
 
 interface JamScore {
   jam: number
@@ -20,92 +20,106 @@ interface JamScore {
   isIntermission?: boolean
 }
 
-interface ApiGame {
-  id: string
-  team1: string
-  team2: string
-  team1Score: number
-  team2Score: number
-  currentJam: number
-  jams: ApiJam[]
-}
-
-interface ApiJam {
-  jamNumber: number
-  team1Points: number
-  team2Points: number
-  period: number
-}
-
 function App() {
-  const [apiUrl, setApiUrl] = useState('')
-  const [pollEnabled, setPollEnabled] = useState(false)
+  const DEFAULT_API_URL = 'http://localhost:5001/live'
+  const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL)
+  const [savedApiUrl, setSavedApiUrl] = useState(DEFAULT_API_URL)
+  const [pollEnabled, setPollEnabled] = useState(true)
   const [pollInterval, setPollInterval] = useState(5000)
+  const [savedPollInterval, setSavedPollInterval] = useState(5000)
   const [isConnected, setIsConnected] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
-  
+  const [lastJam, setLastJam] = useState(0)
+  const [lastPeriod, setLastPeriod] = useState(0)
+  const [lastTeam1Score, setLastTeam1Score] = useState(0)
+  const [lastTeam2Score, setLastTeam2Score] = useState(0)
+
   const [jamData, setJamData] = useState<JamScore[]>([])
   const [team1Name, setTeam1Name] = useState('Team 1')
   const [team2Name, setTeam2Name] = useState('Team 2')
-  
+
   const [team1Input, setTeam1Input] = useState('')
   const [team2Input, setTeam2Input] = useState('')
   const [currentPeriod, setCurrentPeriod] = useState(1)
-
-  const currentJam = jamData.length
-  const team1Total = jamData.length > 0 ? jamData[jamData.length - 1].team1Total : 0
-  const team2Total = jamData.length > 0 ? jamData[jamData.length - 1].team2Total : 0
+  const [currentJam, setCurrentJam] = useState(0)
+  const [team1Total, setTeam1Total] = useState(0)
+  const [team2Total, setTeam2Total] = useState(0)
 
   const fetchGameData = async () => {
-    if (!apiUrl) return
+    if (!savedApiUrl) return
 
     try {
-      const response = await fetch(apiUrl)
+      const response = await fetch(savedApiUrl)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
-      const gameData: ApiGame = await response.json()
-      
-      setTeam1Name(gameData.team1 || 'Team 1')
-      setTeam2Name(gameData.team2 || 'Team 2')
-      
-      const processedJams: JamScore[] = []
-      let team1Running = 0
-      let team2Running = 0
-      let lastPeriod = 0
-      
-      gameData.jams.forEach((jam, index) => {
-        if (jam.period > lastPeriod && lastPeriod > 0) {
-          processedJams.push({
-            jam: processedJams.length > 0 ? processedJams[processedJams.length - 1].jam : 0,
-            team1Score: 0,
-            team2Score: 0,
-            team1Total: team1Running,
-            team2Total: team2Running,
-            period: lastPeriod,
-            isIntermission: true,
-          })
-        }
-        
-        lastPeriod = jam.period
-        team1Running += jam.team1Points
-        team2Running += jam.team2Points
-        
-        processedJams.push({
-          jam: jam.jamNumber,
-          team1Score: jam.team1Points,
-          team2Score: jam.team2Points,
-          team1Total: team1Running,
-          team2Total: team2Running,
-          period: jam.period,
-        })
-      })
-      
-      setJamData(processedJams)
-      if (gameData.jams.length > 0) {
-        setCurrentPeriod(gameData.jams[gameData.jams.length - 1].period)
+
+      const data: LiveState = await response.json()
+
+      if (!data.connected) {
+        setIsConnected(false)
+        return
       }
+
+      const team1 = data.team1 ?? {} as TeamState
+      const team2 = data.team2 ?? {} as TeamState
+
+      setTeam1Name(team1.name || 'Team 1')
+      setTeam2Name(team2.name || 'Team 2')
+      setCurrentPeriod(data.period ?? 1)
+      setCurrentJam(data.jam ?? 0)
+      setTeam1Total(team1.score ?? 0)
+      setTeam2Total(team2.score ?? 0)
+
+      // Detect jam transitions and record per-jam scores
+      setLastJam((prevJam) => {
+        setLastPeriod((prevPeriod) => {
+          setLastTeam1Score((prevT1) => {
+            setLastTeam2Score((prevT2) => {
+              const jamChanged = (data.jam ?? 0) !== prevJam && prevJam > 0
+              const periodChanged = (data.period ?? 0) !== prevPeriod && prevPeriod > 0
+
+              if (periodChanged && !jamChanged) {
+                // Intermission detected
+                setJamData((current) => [
+                  ...current,
+                  {
+                    jam: prevJam,
+                    team1Score: 0,
+                    team2Score: 0,
+                    team1Total: team1.score ?? 0,
+                    team2Total: team2.score ?? 0,
+                    period: prevPeriod,
+                    isIntermission: true,
+                  },
+                ])
+              }
+
+              if (jamChanged) {
+                const t1Delta = (team1.score ?? 0) - prevT1
+                const t2Delta = (team2.score ?? 0) - prevT2
+                setJamData((current) => [
+                  ...current,
+                  {
+                    jam: data.jam ?? 0,
+                    team1Score: t1Delta,
+                    team2Score: t2Delta,
+                    team1Total: team1.score ?? 0,
+                    team2Total: team2.score ?? 0,
+                    period: data.period ?? 0,
+                  },
+                ])
+              }
+
+              return team2.score ?? 0
+            })
+            return team1.score ?? 0
+          })
+          return data.period ?? 0
+        })
+        return data.jam ?? 0
+      })
+
       setIsConnected(true)
       setLastUpdate(new Date())
     } catch (error) {
@@ -116,17 +130,35 @@ function App() {
   }
 
   useEffect(() => {
-    if (!pollEnabled || !apiUrl) {
+    if (!pollEnabled || !savedApiUrl) {
       setIsConnected(false)
       return
     }
 
     fetchGameData()
-    
-    const interval = setInterval(fetchGameData, pollInterval)
-    
+
+    const interval = setInterval(fetchGameData, savedPollInterval)
+
     return () => clearInterval(interval)
-  }, [pollEnabled, apiUrl, pollInterval])
+  }, [pollEnabled, savedApiUrl, savedPollInterval])
+
+  const handleSave = () => {
+    if (!apiUrl) {
+      toast.error('Enter an API endpoint URL')
+      return
+    }
+    setSavedApiUrl(apiUrl)
+    setSavedPollInterval(pollInterval)
+    setPollEnabled(true)
+    toast.success(`Connected — polling every ${pollInterval / 1000}s`)
+  }
+
+  const handleDisconnect = () => {
+    setPollEnabled(false)
+    setSavedApiUrl('')
+    setIsConnected(false)
+    toast.success('Disconnected from API')
+  }
 
   const handleAddJam = () => {
     const team1Score = parseInt(team1Input) || 0
@@ -205,7 +237,7 @@ function App() {
         <Card className="bg-card border-border p-6">
           <div className="space-y-4">
             <h3 className="font-display text-2xl font-semibold text-foreground">API Configuration</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_auto] gap-4 items-end">
               <div className="space-y-2">
                 <Label htmlFor="api-url">API Endpoint URL</Label>
                 <Input
@@ -213,8 +245,9 @@ function App() {
                   type="text"
                   value={apiUrl}
                   onChange={(e) => setApiUrl(e.target.value)}
-                  placeholder="https://api.example.com/game"
+                  placeholder="http://localhost:5001/live"
                   className="bg-background"
+                  disabled={pollEnabled}
                 />
               </div>
               <div className="space-y-2">
@@ -227,18 +260,29 @@ function App() {
                   value={pollInterval}
                   onChange={(e) => setPollInterval(parseInt(e.target.value) || 5000)}
                   className="bg-background"
+                  disabled={pollEnabled}
                 />
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="poll-enabled"
-                checked={pollEnabled}
-                onCheckedChange={(checked) => setPollEnabled(checked)}
-              />
-              <Label htmlFor="poll-enabled" className="cursor-pointer">
-                Enable Live Polling {pollEnabled && `(every ${pollInterval / 1000}s)`}
-              </Label>
+              <div>
+                {!pollEnabled ? (
+                  <Button
+                    onClick={handleSave}
+                    className="w-full bg-accent text-accent-foreground hover:bg-accent/90 font-semibold"
+                  >
+                    <FloppyDisk size={20} weight="fill" />
+                    Save &amp; Connect
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleDisconnect}
+                    variant="outline"
+                    className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-semibold"
+                  >
+                    <Stop size={20} weight="fill" />
+                    Disconnect
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </Card>
