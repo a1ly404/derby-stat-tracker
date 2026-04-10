@@ -1,0 +1,26 @@
+{
+  "name": "@derby/live-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Polls the scoreboard API and writes live jam snapshots to Supabase",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest --run",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.9.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.3",
+    "vitest": "^3.2.4"
+  }
+}

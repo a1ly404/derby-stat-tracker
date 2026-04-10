@@ -7,12 +7,14 @@ on:
     branches: [main, dev]
 
 jobs:
+  # ─────────────────────────────────────────────
+  # 1. Unit & component tests (Vitest — apps/web)
+  # ─────────────────────────────────────────────
   test:
-    name: Run Tests
+    name: Unit Tests (apps/web)
     runs-on: ubuntu-latest
 
     env:
-      # Environment variables to help with jsdom compatibility
       NODE_OPTIONS: --experimental-vm-modules
       FORCE_COLOR: 0
 
@@ -26,25 +28,39 @@ jobs:
           node-version: "22"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace root)
         run: npm ci
 
-      - name: Run linting
-        run: npm run lint
+      - name: Run linting (all workspaces)
+        run: npm run lint --workspace=apps/web
 
-      - name: Run tests
-        run: npm run test
+      - name: Run unit tests
+        run: npm run test --workspace=apps/web
 
-      - name: Generate test coverage
-        run: npm run test:coverage
+      - name: Generate coverage report
+        run: npm run test:coverage --workspace=apps/web
 
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: apps/web/coverage/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  # 2. Build (apps/web)
+  # ─────────────────────────────────────────────
   build:
-    name: Build Application
+    name: Build (apps/web)
     runs-on: ubuntu-latest
-    needs: test # This ensures build only runs if tests pass
+    needs: test
 
     env:
       NODE_OPTIONS: --experimental-vm-modules
+      # Provide stub env vars so Vite build doesn't fail on missing Supabase config
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
 
     steps:
       - name: Checkout code
@@ -56,23 +72,111 @@ jobs:
           node-version: "22"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install dependencies (workspace root)
         run: npm ci
 
-      - name: Build application
-        run: npm run build
+      - name: Build web app
+        run: npm run build --workspace=apps/web
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-files
-          path: dist/
+          name: web-build
+          path: apps/web/dist/
+          retention-days: 7
 
+  # ─────────────────────────────────────────────
+  # 3. Playwright E2E tests (e2e workspace)
+  # ─────────────────────────────────────────────
+  e2e:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    env:
+      # Provide enough config so the Vite dev server starts
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_ANON_KEY: placeholder-anon-key
+      CI: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies (workspace root)
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: e2e
+
+      - name: Run Playwright tests
+        run: npm run test --workspace=e2e
+        env:
+          BASE_URL: http://localhost:5173
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 14
+
+      - name: Upload Playwright test results (screenshots & videos)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-test-results
+          path: e2e/test-results/
+          retention-days: 14
+
+      - name: Upload visual regression snapshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-regression-snapshots
+          path: e2e/tests/**/*-snapshots/
+          retention-days: 14
+
+  # ─────────────────────────────────────────────
+  # 4. Type-check live-bridge service
+  # ─────────────────────────────────────────────
+  typecheck-bridge:
+    name: Type Check (services/live-bridge)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies (workspace root)
+        run: npm ci
+
+      - name: Type-check live-bridge
+        run: npx tsc --noEmit
+        working-directory: services/live-bridge
+
+  # ─────────────────────────────────────────────
+  # 6. Deploy to Vercel (Production — main branch)
+  # ─────────────────────────────────────────────
   deploy:
     name: Deploy to Vercel Production
     runs-on: ubuntu-latest
-    needs: test # This ensures deployment only runs if tests pass
-    if: github.ref == 'refs/heads/main' # Only deploy from main branch
+    needs: [test, e2e]
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
@@ -85,12 +189,17 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: "--prod"
+          # Root directory is configured in Vercel dashboard as apps/web
+          # vercel.json lives at apps/web/vercel.json
 
+  # ─────────────────────────────────────────────
+  # 7. Deploy to Vercel (Preview — dev branch / PRs)
+  # ─────────────────────────────────────────────
   deploy-preview:
     name: Deploy to Vercel Preview
     runs-on: ubuntu-latest
-    needs: test # This ensures deployment only runs if tests pass
-    if: github.ref == 'refs/heads/dev' || github.event.pull_request.head.ref == 'dev' # Deploy preview from dev branch or PRs from dev
+    needs: [test, e2e]
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout code
