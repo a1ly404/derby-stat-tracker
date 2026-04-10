@@ -19,7 +19,7 @@ const mockHomeTeam: Team = {
 }
 
 const mockAwayTeam: Team = {
-  id: 'team-2', 
+  id: 'team-2',
   name: 'Team B',
   city: 'City B',
   logo_url: null,
@@ -84,7 +84,7 @@ describe('LiveBoutHeader Component', () => {
       />
     )
 
-    const startButton = screen.getByText('Start')
+    const startButton = screen.getByText('Start Jam')
     expect(startButton).toBeInTheDocument()
     expect(startButton).toHaveClass('start')
   })
@@ -101,7 +101,7 @@ describe('LiveBoutHeader Component', () => {
       />
     )
 
-    const endButton = screen.getByText('End')
+    const endButton = screen.getByText('End Jam')
     expect(endButton).toBeInTheDocument()
     expect(endButton).toHaveClass('end')
   })
@@ -112,13 +112,13 @@ describe('LiveBoutHeader Component', () => {
         bout={mockBout}
         currentJam={5}
         isJamActive={false}
-        onStartJam={mockOnStartJam}  
+        onStartJam={mockOnStartJam}
         onEndJam={mockOnEndJam}
         onEndBout={mockOnEndBout}
       />
     )
 
-    fireEvent.click(screen.getByText('Start'))
+    fireEvent.click(screen.getByText('Start Jam'))
     expect(mockOnStartJam).toHaveBeenCalledTimes(1)
   })
 
@@ -134,7 +134,7 @@ describe('LiveBoutHeader Component', () => {
       />
     )
 
-    fireEvent.click(screen.getByText('End'))
+    fireEvent.click(screen.getByText('End Jam'))
     expect(mockOnEndJam).toHaveBeenCalledTimes(1)
   })
 
@@ -272,7 +272,7 @@ describe('LiveBoutHeader Component', () => {
     )
 
     // Click start button - this should reset timer to 2:00
-    fireEvent.click(screen.getByText('Start'))
+    fireEvent.click(screen.getByText('Start Jam'))
     expect(screen.getByText('2:00')).toBeInTheDocument()
   })
 

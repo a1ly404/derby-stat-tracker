@@ -38,8 +38,8 @@ describe('ErrorBoundary Component', () => {
             </ErrorBoundary>
         )
 
-        expect(screen.getByText(/configuration error/i)).toBeInTheDocument()
-        expect(screen.getByText(/retry/i)).toBeInTheDocument()
+        expect(screen.getByText(/unexpected error/i)).toBeInTheDocument()
+        expect(screen.getByText(/reload/i)).toBeInTheDocument()
     })
 
     it('logs error to console when error occurs', () => {
@@ -68,7 +68,7 @@ describe('ErrorBoundary Component', () => {
         )
 
         // Should show some kind of error information
-        expect(screen.getByText(/configuration error/i)).toBeInTheDocument()
+        expect(screen.getByText(/unexpected error/i)).toBeInTheDocument()
     })
 
     it('provides recovery instructions', () => {
@@ -79,6 +79,6 @@ describe('ErrorBoundary Component', () => {
         )
 
         // Should provide helpful instructions for recovery
-        expect(screen.getByText(/retry/i)).toBeInTheDocument()
+        expect(screen.getByText(/reload/i)).toBeInTheDocument()
     })
 })

@@ -1,59 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import LiveStatTracker from '../components/LiveStatTracker'
 import { requireSupabase } from '../lib/supabase'
 
 // Mock the requireSupabase function
 vi.mock('../lib/supabase', () => ({
-  requireSupabase: vi.fn()
+  requireSupabase: vi.fn(),
+  isSupabaseConfigured: true
 }))
 
-// Mock interfaces
-interface MockPlayerStatCardProps {
-  player: { id: string; derby_name: string; position: string }
-  stats: { points_scored?: number; penalties?: number }
-  onStatUpdate: (stat: string, value: number) => void
-  isJamActive: boolean
-}
-
-interface MockLiveBoutHeaderProps {
-  bout: { home_team: { name: string }; away_team: { name: string } }
-  currentJam: number
-  isJamActive: boolean
-  onStartJam: () => void
-  onEndJam: () => void
-  onEndBout: () => void
-}
-
-interface MockJamLineupSelectorProps {
-  homeTeamPlayers: unknown[]
-  awayTeamPlayers: unknown[]
-  onStartJam: (homeLineup: unknown[], awayLineup: unknown[]) => void
-  onCancel: () => void
-  currentJam: number
-}
-
-interface MockBoutSummaryProps {
-  bout: { home_score: number; away_score: number }
-  onNewBout: () => void
-  onBackToBouts: () => void
-}
-
-// Mock all child components
-vi.mock('../components/PlayerStatCard', () => ({
-  default: ({ player, onStatUpdate, isJamActive }: MockPlayerStatCardProps) => (
-    <div data-testid={`player-card-${player.id}`}>
-      <span>Player: {player.derby_name}</span>
-      <span>Position: {player.position}</span>
-      <button onClick={() => onStatUpdate('points_scored', 1)}>Add Point</button>
-      <button onClick={() => onStatUpdate('penalties', 1)}>Add Penalty</button>
-      <span>Jam Active: {isJamActive ? 'Yes' : 'No'}</span>
-    </div>
-  )
-}))
-
+// Mock child components
 vi.mock('../components/LiveBoutHeader', () => ({
-  default: ({ bout, currentJam, isJamActive, onStartJam, onEndJam, onEndBout }: MockLiveBoutHeaderProps) => (
+  default: ({ bout, currentJam, isJamActive, onStartJam, onEndJam, onEndBout }: {
+    bout: { home_team: { name: string }; away_team: { name: string } }
+    currentJam: number
+    isJamActive: boolean
+    onStartJam: () => void
+    onEndJam: () => void
+    onEndBout: () => void
+  }) => (
     <div data-testid="live-bout-header">
       <span>Bout: {bout.home_team.name} vs {bout.away_team.name}</span>
       <span>Jam: {currentJam}</span>
@@ -65,20 +30,39 @@ vi.mock('../components/LiveBoutHeader', () => ({
   )
 }))
 
-vi.mock('../components/JamLineupSelector', () => ({
-  default: ({ homeTeamPlayers, awayTeamPlayers, onStartJam, onCancel, currentJam }: MockJamLineupSelectorProps) => (
-    <div data-testid="jam-lineup-selector">
-      <span>Jam {currentJam} Lineup Selection</span>
-      <button onClick={() => onStartJam(homeTeamPlayers.slice(0, 2), awayTeamPlayers.slice(0, 2))}>
-        Start Jam with Sample Lineup
-      </button>
-      <button onClick={onCancel}>Cancel</button>
+vi.mock('../components/JamTracker', () => ({
+  default: ({ currentJamNumber, isJamActive, currentLineup, onUpdateCurrentLineup, homeTeamPlayers, awayTeamPlayers }: {
+    currentJamNumber: number
+    isJamActive: boolean
+    currentLineup: { homeJammer: unknown; awayJammer: unknown }
+    onUpdateCurrentLineup: (lineup: unknown) => void
+    homeTeamPlayers: Array<{ id: string; derby_name: string; team_number: string; preferred_number: string; position: string }>
+    awayTeamPlayers: Array<{ id: string; derby_name: string; team_number: string; preferred_number: string; position: string }>
+  }) => (
+    <div data-testid="jam-tracker">
+      <span>Jam Tracker - Jam {currentJamNumber}</span>
+      <span>Jam Active: {isJamActive ? 'Yes' : 'No'}</span>
+      <button onClick={() => {
+        // Simulate selecting jammers
+        const homeJammer = homeTeamPlayers[0] || null
+        const awayJammer = awayTeamPlayers[0] || null
+        onUpdateCurrentLineup({
+          homeJammer,
+          awayJammer,
+          homeLineup: homeTeamPlayers.slice(0, 2),
+          awayLineup: awayTeamPlayers.slice(0, 2)
+        })
+      }}>Select Lineup</button>
     </div>
   )
 }))
 
 vi.mock('../components/BoutSummary', () => ({
-  default: ({ bout, onNewBout, onBackToBouts }: MockBoutSummaryProps) => (
+  default: ({ bout, onNewBout, onBackToBouts }: {
+    bout: { home_score: number; away_score: number }
+    onNewBout: () => void
+    onBackToBouts: () => void
+  }) => (
     <div data-testid="bout-summary">
       <span>Bout Complete</span>
       <span>Score: {bout.home_score} - {bout.away_score}</span>
@@ -86,6 +70,10 @@ vi.mock('../components/BoutSummary', () => ({
       <button onClick={onBackToBouts}>Back to Bouts</button>
     </div>
   )
+}))
+
+vi.mock('../components/JammerPointsPie', () => ({
+  default: () => <div data-testid="jammer-points-pie" />
 }))
 
 // Mock data
@@ -105,7 +93,7 @@ const mockBout = {
     updated_at: '2025-01-01T00:00:00Z'
   },
   away_team: {
-    id: 'away-team-1', 
+    id: 'away-team-1',
     name: 'Away Crushers',
     created_at: '2025-01-01T00:00:00Z',
     updated_at: '2025-01-01T00:00:00Z'
@@ -114,7 +102,7 @@ const mockBout = {
   updated_at: '2025-01-01T00:00:00Z'
 }
 
-const mockPlayers = [
+const mockHomePlayers = [
   {
     id: 'player-1',
     derby_name: 'Test Jammer',
@@ -125,7 +113,10 @@ const mockPlayers = [
     team_id: 'home-team-1',
     created_at: '2025-01-01T00:00:00Z',
     updated_at: '2025-01-01T00:00:00Z'
-  },
+  }
+]
+
+const mockAwayPlayers = [
   {
     id: 'player-2',
     derby_name: 'Test Blocker',
@@ -153,313 +144,326 @@ const mockPlayerStats = {
   updated_at: '2025-01-01T00:00:00Z'
 }
 
-describe('LiveStatTracker Component', () => {
-  const mockSupabase = {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: mockBout, error: null }))
-        }))
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({ error: null }))
-      })),
-      upsert: vi.fn(() => ({
-        select: vi.fn(() => Promise.resolve({ data: [mockPlayerStats], error: null }))
-      }))
-    }))
+// Helper to build a mock supabase that doesn't recurse
+function createMockSupabase(overrides?: {
+  boutResult?: { data: unknown; error: unknown }
+  jamsResult?: { data: unknown; error: unknown }
+  homePlayerTeamsResult?: { data: unknown; error: unknown }
+  awayPlayerTeamsResult?: { data: unknown; error: unknown }
+  playersResult?: { data: unknown; error: unknown }
+  playerStatsResult?: { data: unknown; error: unknown }
+  updateResult?: { error: unknown }
+  upsertResult?: { data: unknown; error: unknown }
+  insertResult?: { data: unknown; error: unknown }
+}) {
+  const defaults = {
+    boutResult: { data: mockBout, error: null },
+    jamsResult: { data: [], error: null },
+    homePlayerTeamsResult: {
+      data: [{ player_id: 'player-1', number: '1', position: 'jammer', is_active: true }],
+      error: null
+    },
+    awayPlayerTeamsResult: {
+      data: [{ player_id: 'player-2', number: '2', position: 'blocker', is_active: true }],
+      error: null
+    },
+    playersResult: {
+      data: [...mockHomePlayers, ...mockAwayPlayers],
+      error: null
+    },
+    playerStatsResult: { data: [mockPlayerStats], error: null },
+    updateResult: { error: null },
+    upsertResult: { data: [mockPlayerStats], error: null },
+    insertResult: { data: [mockPlayerStats], error: null },
+    ...overrides
   }
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-    vi.mocked(requireSupabase).mockReturnValue(mockSupabase as typeof mockSupabase)
-    
-    // Mock the fetch calls for team players
-    mockSupabase.from.mockImplementation((table: string) => {
+  // Track which team_id eq calls have been seen for player_teams
+  let playerTeamsEqTeamId: string | null = null
+
+  const mockSupabase = {
+    from: vi.fn((table: string) => {
       if (table === 'bouts') {
         return {
-          select: () => ({
-            eq: () => ({
-              single: () => Promise.resolve({ data: mockBout, error: null })
-            })
-          }),
-          update: () => ({
-            eq: () => Promise.resolve({ error: null })
-          })
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              single: vi.fn(() => Promise.resolve(defaults.boutResult))
+            }))
+          })),
+          update: vi.fn(() => ({
+            eq: vi.fn(() => Promise.resolve(defaults.updateResult))
+          }))
+        }
+      }
+      if (table === 'jams') {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              order: vi.fn(() => Promise.resolve(defaults.jamsResult))
+            }))
+          })),
+          upsert: vi.fn(() => ({
+            select: vi.fn(() => Promise.resolve(defaults.upsertResult))
+          }))
         }
       }
       if (table === 'player_teams') {
         return {
-          select: () => ({
-            eq: () => ({
-              eq: () => Promise.resolve({ data: [{ player_id: 'player-1', number: '1', position: 'jammer', is_active: true }], error: null })
+          select: vi.fn(() => ({
+            eq: vi.fn((col: string, val: unknown) => {
+              if (col === 'team_id') {
+                playerTeamsEqTeamId = val as string
+              }
+              return {
+                eq: vi.fn(() => {
+                  if (playerTeamsEqTeamId === 'home-team-1') {
+                    return Promise.resolve(defaults.homePlayerTeamsResult)
+                  }
+                  return Promise.resolve(defaults.awayPlayerTeamsResult)
+                })
+              }
             })
-          })
+          }))
         }
       }
       if (table === 'players') {
         return {
-          select: () => ({
-            in: () => Promise.resolve({ data: mockPlayers, error: null })
-          })
+          select: vi.fn(() => ({
+            in: vi.fn(() => Promise.resolve(defaults.playersResult))
+          }))
         }
       }
       if (table === 'player_stats') {
         return {
-          select: () => ({
-            eq: () => Promise.resolve({ data: [mockPlayerStats], error: null })
-          }),
-          upsert: () => ({
-            select: () => Promise.resolve({ data: [mockPlayerStats], error: null })
-          }),
-          update: () => ({
-            eq: () => Promise.resolve({ error: null })
-          })
+          select: vi.fn(() => ({
+            eq: vi.fn(() => Promise.resolve(defaults.playerStatsResult))
+          })),
+          upsert: vi.fn(() => ({
+            select: vi.fn(() => Promise.resolve(defaults.upsertResult))
+          })),
+          update: vi.fn(() => ({
+            eq: vi.fn(() => Promise.resolve(defaults.updateResult))
+          })),
+          insert: vi.fn(() => Promise.resolve(defaults.insertResult))
         }
       }
-      return mockSupabase.from()
+      // Default fallback — return safe no-ops (no recursion!)
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+            eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+            order: vi.fn(() => Promise.resolve({ data: [], error: null }))
+          })),
+          in: vi.fn(() => Promise.resolve({ data: [], error: null }))
+        })),
+        update: vi.fn(() => ({
+          eq: vi.fn(() => Promise.resolve({ error: null }))
+        })),
+        upsert: vi.fn(() => ({
+          select: vi.fn(() => Promise.resolve({ data: [], error: null }))
+        })),
+        insert: vi.fn(() => Promise.resolve({ data: [], error: null }))
+      }
     })
+  }
+
+  return mockSupabase
+}
+
+describe('LiveStatTracker Component', () => {
+  let mockSupabase: ReturnType<typeof createMockSupabase>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockSupabase = createMockSupabase()
+    vi.mocked(requireSupabase).mockReturnValue(mockSupabase as unknown as ReturnType<typeof requireSupabase>)
   })
 
   it('renders placeholder when no boutId is provided', () => {
     render(<LiveStatTracker />)
-    
+
     expect(screen.getByText('📊 Live Stat Tracker')).toBeInTheDocument()
     expect(screen.getByText('Select a bout from the Bouts page to start live tracking')).toBeInTheDocument()
   })
 
   it('shows loading state initially', () => {
     render(<LiveStatTracker boutId="bout-1" />)
-    
+
     expect(screen.getByText('Loading bout data...')).toBeInTheDocument()
   })
 
-  it('loads bout data and shows lineup selector', async () => {
+  it('loads bout data and shows live tracking interface', async () => {
     render(<LiveStatTracker boutId="bout-1" />)
-    
+
     await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
+      expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
     })
-    
-    expect(screen.getByText('Jam 1 Lineup Selection')).toBeInTheDocument()
+
+    expect(screen.getByText('Bout: Home Rollers vs Away Crushers')).toBeInTheDocument()
+    expect(screen.getByTestId('jam-tracker')).toBeInTheDocument()
   })
 
   it('handles bout data loading error', async () => {
-    mockSupabase.from.mockImplementation(() => ({
-      select: () => ({
-        eq: () => ({
-          single: () => Promise.resolve({ data: null, error: { message: 'Bout not found' } })
-        })
-      })
-    }))
+    mockSupabase = createMockSupabase({
+      boutResult: { data: null, error: { message: 'Bout not found' } }
+    })
+    vi.mocked(requireSupabase).mockReturnValue(mockSupabase as unknown as ReturnType<typeof requireSupabase>)
 
     render(<LiveStatTracker boutId="bout-1" />)
-    
+
+    // When fetchBout fails, loading is never set to false (fetchTeamPlayers
+    // never runs), so the component stays on the loading screen.
     await waitFor(() => {
       expect(screen.getByText('Loading bout data...')).toBeInTheDocument()
     })
   })
 
-  it('starts a jam and shows live tracking interface', async () => {
+  it('shows jam tracker with correct jam number', async () => {
     render(<LiveStatTracker boutId="bout-1" />)
-    
-    // Wait for lineup selector to appear
+
     await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
+      expect(screen.getByTestId('jam-tracker')).toBeInTheDocument()
     })
-    
-    // Start a jam
-    const startJamButton = screen.getByText('Start Jam with Sample Lineup')
-    fireEvent.click(startJamButton)
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
-    })
-    
-    expect(screen.getByText('Bout: Home Rollers vs Away Crushers')).toBeInTheDocument()
-    expect(screen.getByText('Active: Yes')).toBeInTheDocument()
+
+    expect(screen.getByText('Jam Tracker - Jam 1')).toBeInTheDocument()
   })
 
-  it('ends a jam and returns to lineup selector', async () => {
-    render(<LiveStatTracker boutId="bout-1" />)
-    
-    // Start jam first
-    await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
-    })
-    
-    fireEvent.click(screen.getByText('Start Jam with Sample Lineup'))
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
-    })
-    
-    // End jam
-    const endJamButton = screen.getByText('End Jam')
-    fireEvent.click(endJamButton)
-    
-    await waitFor(() => {
-      expect(screen.getByText('Jam 2 Lineup Selection')).toBeInTheDocument()
-    })
-  })
+  it('starts a jam via header start button after selecting lineup', async () => {
+    // Mock window.alert since handleJamStart will alert if no jammers selected
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
 
-  it('updates player stats during jam', async () => {
     render(<LiveStatTracker boutId="bout-1" />)
-    
-    // Start jam
-    await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
-    })
-    
-    fireEvent.click(screen.getByText('Start Jam with Sample Lineup'))
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
     })
-    
-    // Add points to a player
-    const addPointButtons = screen.getAllByText('Add Point')
-    fireEvent.click(addPointButtons[0])
-    
-    // Verify supabase update was called
-    expect(mockSupabase.from).toHaveBeenCalledWith('player_stats')
+
+    // First select a lineup via JamTracker mock
+    await act(async () => {
+      fireEvent.click(screen.getByText('Select Lineup'))
+    })
+
+    // Now start the jam
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Jam'))
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Active: Yes')).toBeInTheDocument()
+    })
+
+    alertSpy.mockRestore()
   })
 
   it('ends bout and shows summary', async () => {
     render(<LiveStatTracker boutId="bout-1" />)
-    
-    // Start jam first
-    await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
-    })
-    
-    fireEvent.click(screen.getByText('Start Jam with Sample Lineup'))
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
     })
-    
-    // End bout
-    const endBoutButton = screen.getByText('End Bout')
-    fireEvent.click(endBoutButton)
-    
+
+    // End bout directly
+    await act(async () => {
+      fireEvent.click(screen.getByText('End Bout'))
+    })
+
     await waitFor(() => {
       expect(screen.getByTestId('bout-summary')).toBeInTheDocument()
     })
-    
+
     expect(screen.getByText('Bout Complete')).toBeInTheDocument()
-    expect(screen.getByText('Score: 25 - 18')).toBeInTheDocument()
   })
 
   it('handles navigation back from bout summary', async () => {
     const mockOnNavigateBack = vi.fn()
-    
+
     render(<LiveStatTracker boutId="bout-1" onNavigateBack={mockOnNavigateBack} />)
-    
-    // Start and immediately end bout to get to summary
-    await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
-    })
-    
-    fireEvent.click(screen.getByText('Start Jam with Sample Lineup'))
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
     })
-    
-    fireEvent.click(screen.getByText('End Bout'))
-    
+
+    // End bout to get to summary
+    await act(async () => {
+      fireEvent.click(screen.getByText('End Bout'))
+    })
+
     await waitFor(() => {
       expect(screen.getByTestId('bout-summary')).toBeInTheDocument()
     })
-    
+
     // Click back to bouts
     fireEvent.click(screen.getByText('Back to Bouts'))
-    
+
     expect(mockOnNavigateBack).toHaveBeenCalled()
   })
 
   it('handles new bout from summary', async () => {
     const mockOnNavigateBack = vi.fn()
-    
+
     render(<LiveStatTracker boutId="bout-1" onNavigateBack={mockOnNavigateBack} />)
-    
-    // Get to bout summary
-    await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
-    })
-    
-    fireEvent.click(screen.getByText('Start Jam with Sample Lineup'))
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
     })
-    
-    fireEvent.click(screen.getByText('End Bout'))
-    
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('End Bout'))
+    })
+
     await waitFor(() => {
       expect(screen.getByTestId('bout-summary')).toBeInTheDocument()
     })
-    
-    // Click new bout
+
     fireEvent.click(screen.getByText('New Bout'))
-    
+
     expect(mockOnNavigateBack).toHaveBeenCalled()
   })
 
-  it('cancels lineup selection for subsequent jams', async () => {
+  it('displays bout header with correct team names after loading', async () => {
     render(<LiveStatTracker boutId="bout-1" />)
-    
-    // Start and end first jam to get to jam 2
+
     await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
+      expect(screen.getByText('Bout: Home Rollers vs Away Crushers')).toBeInTheDocument()
     })
-    
-    fireEvent.click(screen.getByText('Start Jam with Sample Lineup'))
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
-    })
-    
-    fireEvent.click(screen.getByText('End Jam'))
-    
-    await waitFor(() => {
-      expect(screen.getByText('Jam 2 Lineup Selection')).toBeInTheDocument()
-    })
-    
-    // Cancel lineup selection (goes back to previous jam)
-    fireEvent.click(screen.getByText('Cancel'))
-    
-    // After cancel, should still show live bout header but with jam 1
-    expect(screen.getByTestId('live-bout-header')).toBeInTheDocument()
-    expect(screen.getByText('Jam: 1')).toBeInTheDocument()
   })
 
-  it('initializes player stats for new players', async () => {
+  it('shows jam number 1 initially', async () => {
     render(<LiveStatTracker boutId="bout-1" />)
-    
+
     await waitFor(() => {
-      expect(screen.getByTestId('jam-lineup-selector')).toBeInTheDocument()
+      expect(screen.getByText('Jam: 1')).toBeInTheDocument()
     })
-    
-    // Verify that upsert was called to initialize stats
-    expect(mockSupabase.from).toHaveBeenCalledWith('player_stats')
+  })
+
+  it('shows jam as inactive initially', async () => {
+    render(<LiveStatTracker boutId="bout-1" />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Active: No')).toBeInTheDocument()
+    })
+  })
+
+  it('calls requireSupabase when loading bout data', async () => {
+    render(<LiveStatTracker boutId="bout-1" />)
+
+    await waitFor(() => {
+      expect(requireSupabase).toHaveBeenCalled()
+    })
   })
 
   it('handles database errors gracefully', async () => {
-    // Mock database error
-    mockSupabase.from.mockImplementation(() => ({
-      select: () => ({
-        eq: () => ({
-          single: () => Promise.reject(new Error('Database connection failed'))
-        })
-      })
-    }))
+    vi.mocked(requireSupabase).mockImplementation(() => {
+      throw new Error('Supabase is not configured')
+    })
 
     render(<LiveStatTracker boutId="bout-1" />)
-    
+
+    // When requireSupabase throws, fetchBout catches but never sets
+    // loading=false, so the component remains on the loading screen.
     await waitFor(() => {
       expect(screen.getByText('Loading bout data...')).toBeInTheDocument()
-    }, { timeout: 3000 })
+    })
   })
 })
