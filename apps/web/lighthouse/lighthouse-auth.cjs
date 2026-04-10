@@ -4,6 +4,8 @@
  * It checks if already authenticated and skips login if so
  */
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 module.exports = async (browser, context) => {
   // Get authentication credentials from environment variables
   const email = process.env.LIGHTHOUSE_TEST_EMAIL;
@@ -68,7 +70,7 @@ module.exports = async (browser, context) => {
     console.log('🔐 Not authenticated - proceeding with login...');
 
     // Wait for page to load completely
-    await page.waitForTimeout(2000);
+    await sleep(2000);
 
     // Look for and click the Sign In button
     console.log('🔍 Looking for Sign In button...');
@@ -91,7 +93,7 @@ module.exports = async (browser, context) => {
     console.log('✅ Clicked Sign In button');
 
     // Wait for login modal to appear
-    await page.waitForTimeout(2000);
+    await sleep(2000);
 
     // Wait for email input to be available
     console.log('⏳ Waiting for login form...');
@@ -111,7 +113,7 @@ module.exports = async (browser, context) => {
 
     // Wait for login to process
     console.log('⏳ Waiting for authentication to complete...');
-    await page.waitForTimeout(5000);
+    await sleep(5000);
 
     // Verify login success by checking for authenticated elements
     const loginSuccess = await page.evaluate(() => {
