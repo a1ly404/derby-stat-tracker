@@ -62,8 +62,8 @@ test.describe('Manual Stat Tracking', () => {
   test('navigates to Players section', async ({ page }) => {
     await page.getByRole('button', { name: /Players/i }).click()
 
-    // Players view should render — look for a heading or distinctive element
-    await expect(page.getByText(/Players/i).first()).toBeVisible()
+    // Players view should render — assert a page-specific heading
+    await expect(page.getByRole('heading', { name: /Players Management/i })).toBeVisible()
 
     await page.screenshot({
       path: 'test-results/screenshots/manual-players.png',
@@ -73,7 +73,7 @@ test.describe('Manual Stat Tracking', () => {
   test('navigates to Bouts section', async ({ page }) => {
     await page.getByRole('button', { name: /Bouts/i }).click()
 
-    await expect(page.getByText(/Bouts/i).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Bout Management/i })).toBeVisible()
 
     await page.screenshot({
       path: 'test-results/screenshots/manual-bouts.png',
@@ -83,7 +83,7 @@ test.describe('Manual Stat Tracking', () => {
   test('navigates to Teams section', async ({ page }) => {
     await page.getByRole('button', { name: /Teams/i }).click()
 
-    await expect(page.getByText(/Teams/i).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Teams Management/i })).toBeVisible()
 
     await page.screenshot({
       path: 'test-results/screenshots/manual-teams.png',
@@ -93,15 +93,15 @@ test.describe('Manual Stat Tracking', () => {
   test('can navigate between all sections sequentially', async ({ page }) => {
     // Dashboard → Players
     await page.getByRole('button', { name: /Players/i }).click()
-    await expect(page.getByText(/Players/i).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Players Management/i })).toBeVisible()
 
     // Players → Bouts
     await page.getByRole('button', { name: /Bouts/i }).click()
-    await expect(page.getByText(/Bouts/i).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Bout Management/i })).toBeVisible()
 
     // Bouts → Teams
     await page.getByRole('button', { name: /Teams/i }).click()
-    await expect(page.getByText(/Teams/i).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Teams Management/i })).toBeVisible()
 
     // Teams → Dashboard
     await page.getByRole('button', { name: /Dashboard/i }).click()

@@ -173,15 +173,10 @@ test.describe('Full-Stack Integration @integration', () => {
       // Wait for connected state
       await expect(page.getByText(/Connected/i)).toBeVisible({ timeout: 15_000 })
 
-      // The API should return team names from CRG — verify they render
-      // (CRG defaults to "Team 1" / "Team 2" if no game is configured)
-      // We just verify the team name containers exist and have text content
+      // Verify at least one team-related UI element is present when connected
       const teamElements = page.locator('[class*="team"], [data-testid*="team"]')
-      const count = await teamElements.count()
-
-      // At minimum the page should show some team-related content
-      // when connected to a real API
-      expect(count).toBeGreaterThanOrEqual(0) // non-crashing assertion
+      await expect(teamElements.first()).toBeVisible({ timeout: 15_000 })
+      expect(await teamElements.count()).toBeGreaterThan(0)
 
       await page.screenshot({
         path: 'test-results/screenshots/integration-live-teams.png',
@@ -362,10 +357,11 @@ test.describe('Full-Stack Integration @integration', () => {
         'intermission',
       ]
 
-      // The game_state should be a string; it may not match exactly if CRG
-      // uses a variant we haven't seen, so we just assert it's a string
+      // The game_state should be one of the known CRG states.
+      // If CRG introduces a new variant, add it to the list above.
       expect(typeof body.game_state).toBe('string')
       expect(body.game_state.length).toBeGreaterThan(0)
+      expect(knownStates).toContain(body.game_state)
     })
 
     test('/raw endpoint returns flat key-value state', async ({ request }) => {

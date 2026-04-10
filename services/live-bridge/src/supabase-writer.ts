@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { logger } from './logger.js'
+import { extractJammerName } from './types.js'
 import type { LiveGameRow, LiveJamSnapshotRow, LiveState } from './types.js'
 
 // ---------------------------------------------------------------------------
@@ -132,8 +133,11 @@ export class SupabaseWriter {
       team2_score: liveState.team2?.score ?? null,
       team1_jam_score: liveState.team1?.jam_score ?? null,
       team2_jam_score: liveState.team2?.jam_score ?? null,
-      team1_jammer: liveState.team1?.jammer ?? null,
-      team2_jammer: liveState.team2?.jammer ?? null,
+      // Extract jammer name from the SkaterPosition object.
+      // The API returns jammer as { name, number, in_box, ... } — we store
+      // just the name in the dedicated column; the full object lives in raw_state.
+      team1_jammer: extractJammerName(liveState.team1),
+      team2_jammer: extractJammerName(liveState.team2),
       team1_lead: liveState.team1?.lead ?? null,
       team2_lead: liveState.team2?.lead ?? null,
       raw_state: liveState,
@@ -192,5 +196,68 @@ export class SupabaseWriter {
     }
 
     logger.info('live_game marked completed', { liveGameId })
+  }
+
+  // -------------------------------------------------------------------------
+  // digestGame
+  // -------------------------------------------------------------------------
+
+  /**
+   * Calls the `digest_live_game` and `reconcile_live_players` Supabase RPC
+   * functions for the given live game.  This should be invoked after a game
+   * has been marked as completed so that aggregated stats are computed while
+   * the data is fresh.
+   *
+   * Errors are logged as warnings but never rethrown — digesting is a
+   * best-effort post-processing step and must not crash the bridge.
+   */
+  async digestGame(gameId: string): Promise<void> {
+    logger.info('Starting post-game digest', { gameId })
+
+    // 1. digest_live_game
+    try {
+      const { error: digestError } = await this.client.rpc('digest_live_game', {
+        game_id: gameId,
+      }) as { error: { message: string; code: string } | null }
+
+      if (digestError) {
+        logger.warn('digest_live_game RPC returned an error', {
+          gameId,
+          message: digestError.message,
+          code: digestError.code,
+        })
+      } else {
+        logger.info('digest_live_game completed successfully', { gameId })
+      }
+    } catch (err) {
+      logger.warn('digest_live_game RPC call failed', {
+        gameId,
+        error: err instanceof Error ? err.message : String(err),
+      })
+    }
+
+    // 2. reconcile_live_players
+    try {
+      const { error: reconcileError } = await this.client.rpc('reconcile_live_players', {
+        game_id: gameId,
+      }) as { error: { message: string; code: string } | null }
+
+      if (reconcileError) {
+        logger.warn('reconcile_live_players RPC returned an error', {
+          gameId,
+          message: reconcileError.message,
+          code: reconcileError.code,
+        })
+      } else {
+        logger.info('reconcile_live_players completed successfully', { gameId })
+      }
+    } catch (err) {
+      logger.warn('reconcile_live_players RPC call failed', {
+        gameId,
+        error: err instanceof Error ? err.message : String(err),
+      })
+    }
+
+    logger.info('Post-game digest finished', { gameId })
   }
 }

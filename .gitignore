@@ -2,6 +2,10 @@
 # Derby Stat Tracker — Monorepo .gitignore
 # ============================================================
 
+# ── Database backups & archives ─────────────────────────────
+*.backup.gz
+*.storage.zip
+
 # ── Node ────────────────────────────────────────────────────
 node_modules/
 npm-debug.log*

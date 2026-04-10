@@ -66,8 +66,9 @@ test.describe('Live Tracker – Score Graph', () => {
     await expect(svg).toBeVisible()
 
     // The ScoreGraph renders two <path> elements — one per team score line.
-    // They are direct children of the <g> group inside the SVG.
-    const paths = svg.locator('path')
+    // D3 axes also generate <path class="domain"> elements for the axis
+    // baselines, so we exclude those with :not(.domain).
+    const paths = svg.locator('path:not(.domain)')
     await expect(paths).toHaveCount(2)
 
     // Both paths must have a non-empty `d` attribute (the line data)

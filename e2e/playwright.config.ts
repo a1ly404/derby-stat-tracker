@@ -94,19 +94,24 @@ export default defineConfig({
        * Only run tests that are NOT inside the live-tracker sub-directory.
        * New web-app spec files placed directly under tests/ are picked up
        * automatically.
+       *
+       * NOTE: Playwright tests `testMatch` / `testIgnore` regexes against the
+       * **absolute** file path, so `^`-anchored patterns never work.  We use
+       * `testIgnore` with an un-anchored regex to exclude the live-tracker
+       * directory instead.
        */
-      testMatch: /tests\/(?!live-tracker\/).*\.spec\.ts/,
+      testIgnore: /live-tracker\//,
     },
 
     {
       name: 'live-tracker',
       use: {
         ...devices['Desktop Chrome'],
-        /** Point this project at the live-tracker dev server */
+        /** Point this project at the live-tracker dev server (port 5175) */
         baseURL: 'http://localhost:5175',
       },
       /** Only run specs that live under tests/live-tracker/ */
-      testMatch: /tests\/live-tracker\/.*\.spec\.ts/,
+      testMatch: /live-tracker\/.*\.spec\.ts/,
     },
 
     // Uncomment to also run tests in Firefox and WebKit:
@@ -154,10 +159,10 @@ export default defineConfig({
     // ── apps/live-tracker ───────────────────────────────────────────────────
     {
       /**
-       * Pass --port via the Vite CLI so the live-tracker server binds to 5175
-       * instead of its default 5173, avoiding a conflict with apps/web.
+       * The live-tracker dev server runs on port 5175 (separate from
+       * apps/web on 5173).
        */
-      command: 'npm run dev -- --port 5175',
+      command: 'npm run dev',
       /** Path relative to this config file */
       cwd: '../apps/live-tracker',
       url: 'http://localhost:5175',

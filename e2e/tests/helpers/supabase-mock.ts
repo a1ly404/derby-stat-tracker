@@ -14,26 +14,13 @@ import { type Page } from '@playwright/test'
 // ---------------------------------------------------------------------------
 
 /**
- * Tables the web app queries.  Each entry maps to an empty-array response
- * so the UI renders its "empty state" instead of crashing on a network error.
- */
-const MOCKED_TABLES = [
-  'bouts',
-  'players',
-  'teams',
-  'jams',
-  'player_teams',
-  'player_stats',
-] as const
-
-/**
  * Intercept all Supabase PostgREST endpoints (`/rest/v1/*`) and return empty
  * results for every table the app queries.
  *
  * Handles:
  *  - Regular SELECT queries  → `[]`
  *  - HEAD / count-only queries (`Prefer: count=exact`) → empty body with
- *    `content-range: 0-0/0` header so the SDK reads `count` as 0
+ *    `content-range` header (range unknown, total 0) so the SDK reads `count` as 0
  *  - INSERT / UPDATE / DELETE → 200 with `[]` (no-op)
  *
  * Call this **before** navigating so intercepts are active from the first

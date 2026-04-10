@@ -129,16 +129,14 @@ test.describe('Live Scoreboard Mode', () => {
 
     // Change the URL and apply to trigger a fresh health check
     const urlInput = page.locator('#scoreboard-url')
+    // Use 127.0.0.1 instead of localhost to ensure the URL differs and trigger Apply
     await urlInput.clear()
-    await urlInput.fill('http://localhost:5001')
-    // Type a trailing character to ensure the URL differs, then fix it
-    await urlInput.clear()
-    await urlInput.fill('http://localhost:5001/api')
+    await urlInput.fill('http://127.0.0.1:5001')
 
     await page.getByRole('button', { name: /Apply/i }).click()
 
     // Wait for the connected status to appear
-    await expect(page.getByText(/Connected/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('Connected', { exact: true })).toBeVisible({ timeout: 10_000 })
   })
 
   test('screenshot – connected state', async ({ page }) => {
@@ -152,13 +150,13 @@ test.describe('Live Scoreboard Mode', () => {
       })
     })
 
-    // Trigger a fresh connection by changing the URL
+    // Use 127.0.0.1 instead of localhost to ensure the URL differs and trigger Apply
     const urlInput = page.locator('#scoreboard-url')
     await urlInput.clear()
-    await urlInput.fill('http://localhost:5001/api')
+    await urlInput.fill('http://127.0.0.1:5001')
     await page.getByRole('button', { name: /Apply/i }).click()
 
-    await expect(page.getByText(/Connected/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('Connected', { exact: true })).toBeVisible({ timeout: 10_000 })
 
     await page.screenshot({
       path: 'test-results/screenshots/live-mode-connected.png',
@@ -178,13 +176,13 @@ test.describe('Live Scoreboard Mode', () => {
       })
     })
 
-    // Trigger a fresh connection
+    // Use 127.0.0.1 instead of localhost to ensure the URL differs and trigger Apply
     const urlInput = page.locator('#scoreboard-url')
     await urlInput.clear()
-    await urlInput.fill('http://localhost:5001/api')
+    await urlInput.fill('http://127.0.0.1:5001')
     await page.getByRole('button', { name: /Apply/i }).click()
 
-    await expect(page.getByText(/Connected/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('Connected', { exact: true })).toBeVisible({ timeout: 10_000 })
 
     // The connected placeholder should display the "Live Scoreboard" heading
     await expect(
@@ -207,10 +205,10 @@ test.describe('Live Scoreboard Mode', () => {
       })
     })
 
-    // Trigger a health check by changing the URL
+    // Use 127.0.0.1 instead of localhost to ensure the URL differs and trigger Apply
     const urlInput = page.locator('#scoreboard-url')
     await urlInput.clear()
-    await urlInput.fill('http://localhost:5001/api')
+    await urlInput.fill('http://127.0.0.1:5001')
     await page.getByRole('button', { name: /Apply/i }).click()
 
     // The app should remain functional and show Disconnected status

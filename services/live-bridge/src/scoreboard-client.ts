@@ -1,20 +1,6 @@
 import { logger } from './logger.js'
+import { DISCONNECTED_STATE } from './types.js'
 import type { LiveState } from './types.js'
-
-// ---------------------------------------------------------------------------
-// Disconnected sentinel — returned whenever the scoreboard cannot be reached
-// or explicitly reports it is not connected.
-// ---------------------------------------------------------------------------
-
-const DISCONNECTED_STATE: LiveState = {
-  connected: false,
-  period: null,
-  jam: null,
-  jam_clock: null,
-  period_clock: null,
-  team1: null,
-  team2: null,
-}
 
 export interface HealthResponse {
   connected: boolean

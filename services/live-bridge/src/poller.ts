@@ -175,6 +175,17 @@ export class JamPoller {
           error: errorMessage(err),
         })
       }
+
+      // Trigger post-game digest (best-effort — digestGame logs warnings
+      // internally and never throws).
+      try {
+        await this.writer.digestGame(this.liveGameId)
+      } catch (err) {
+        logger.warn('Post-game digest failed during shutdown', {
+          liveGameId: this.liveGameId,
+          error: errorMessage(err),
+        })
+      }
     }
 
     logger.info('Graceful shutdown complete')
