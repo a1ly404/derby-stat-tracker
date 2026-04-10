@@ -333,7 +333,7 @@ jobs:
     name: Deploy to Vercel Preview
     runs-on: ubuntu-latest
     needs: [test, e2e]
-    if: github.ref == 'refs/heads/dev' || github.event.pull_request.head.ref == 'dev'
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout code
