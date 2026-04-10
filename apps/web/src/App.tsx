@@ -9,6 +9,8 @@ import Bouts from './components/Bouts'
 import LiveStatTracker from './components/LiveStatTracker'
 import { Auth } from './components/Auth'
 import { ConfigurationError } from './components/ConfigurationError'
+import ModeSelector from './components/ModeSelector'
+import LiveScoreboardView from './components/LiveScoreboardView'
 import { useAuth } from './hooks/useAuth'
 import { isSupabaseConfigured } from './lib/supabase'
 import { Analytics } from "@vercel/analytics/react"
@@ -16,12 +18,12 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 import { ActiveView } from './types'
 
 function App() {
-  const [activeView, setActiveView] = useState<ActiveView>('dashboard')
+  // Initial view after auth is the mode selector
+  const [activeView, setActiveView] = useState<ActiveView>('mode-select')
   const [selectedBoutId, setSelectedBoutId] = useState<string | null>(null)
 
-  // Always call hooks first (React hooks rules)
   const { user, loading } = useAuth()
-  
+
   const handleStartLiveTracking = (boutId: string) => {
     setSelectedBoutId(boutId)
     setActiveView('live-track')
@@ -32,11 +34,12 @@ function App() {
     setActiveView('bouts')
   }
 
-  // Check for configuration errors early - if Supabase is not configured, show error
+  // ── Guard: Supabase not configured ──────────────────────────────────────────
   if (!isSupabaseConfigured) {
     return <ConfigurationError error="Missing Supabase environment variables" />
   }
 
+  // ── Guard: auth loading ──────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="loading-container">
@@ -47,10 +50,32 @@ function App() {
     )
   }
 
+  // ── Guard: not authenticated ─────────────────────────────────────────────────
   if (!user) {
     return <Auth onAuthSuccess={() => { }} />
   }
 
+  // ── Full-screen view: mode selector (post-login landing) ─────────────────────
+  if (activeView === 'mode-select') {
+    return (
+      <ModeSelector
+        onSelectManual={() => setActiveView('dashboard')}
+        onSelectLive={() => setActiveView('live-scoreboard')}
+      />
+    )
+  }
+
+  // ── Full-screen view: live scoreboard ────────────────────────────────────────
+  if (activeView === 'live-scoreboard') {
+    return (
+      <LiveScoreboardView
+        connected={false}
+        onBack={() => setActiveView('mode-select')}
+      />
+    )
+  }
+
+  // ── Normal app shell (manual tracking flow) ──────────────────────────────────
   return (
     <div className="app">
       <Header />
@@ -59,15 +84,19 @@ function App() {
         <main className="main-content">
           {activeView === 'dashboard' && <Dashboard />}
           {activeView === 'players' && <Players />}
-          {activeView === 'bouts' && <Bouts onStartLiveTracking={handleStartLiveTracking} />}
+          {activeView === 'bouts' && (
+            <Bouts onStartLiveTracking={handleStartLiveTracking} />
+          )}
           {activeView === 'teams' && <Teams />}
           {activeView === 'live-track' && (
-            <LiveStatTracker 
-              boutId={selectedBoutId} 
+            <LiveStatTracker
+              boutId={selectedBoutId}
               onNavigateBack={handleNavigateBackToBouts}
             />
           )}
-          {activeView === 'settings' && <div className="view-placeholder">Settings - Coming Soon</div>}
+          {activeView === 'settings' && (
+            <div className="view-placeholder">Settings - Coming Soon</div>
+          )}
           <Analytics />
           <SpeedInsights />
         </main>

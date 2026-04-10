@@ -11,6 +11,9 @@ vi.mock('../hooks/useAuth', () => ({
 vi.mock('../lib/supabase', () => ({
     isSupabaseConfigured: true,
     requireSupabase: vi.fn(() => ({
+        auth: {
+            signOut: vi.fn(() => Promise.resolve({ error: null }))
+        },
         from: vi.fn(() => ({
             select: vi.fn(() => ({
                 order: vi.fn(() => ({
@@ -93,7 +96,7 @@ describe('App Component', () => {
         expect(screen.getByText(/sign in to derby stat tracker/i)).toBeInTheDocument()
     })
 
-    it('shows main app when user is logged in', () => {
+    it('shows mode selector when user is logged in', () => {
         vi.mocked(useAuth).mockReturnValue({
             user: mockUser,
             session: mockSession,
@@ -103,14 +106,14 @@ describe('App Component', () => {
 
         render(<App />)
 
-        // Should show navigation and main content
-        expect(screen.getByRole('navigation')).toBeInTheDocument()
-        expect(screen.getByText('Derby Stat Tracker')).toBeInTheDocument()
-        expect(screen.getByText('test@example.com')).toBeInTheDocument()
-        expect(screen.getByRole('main')).toBeInTheDocument()
+        // After login the user lands on the mode selector, not the app shell
+        expect(screen.getByText(/manual stat tracking/i)).toBeInTheDocument()
+        expect(screen.getByText(/live from scoreboard/i)).toBeInTheDocument()
+        // The normal nav shell should NOT be visible yet
+        expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
     })
 
-    it('switches between different views', async () => {
+    it('switches between different views after selecting manual mode', async () => {
         const user = userEvent.setup()
 
         vi.mocked(useAuth).mockReturnValue({
@@ -121,6 +124,13 @@ describe('App Component', () => {
         })
 
         render(<App />)
+
+        // First, select Manual Stat Tracking mode to enter the app shell
+        const manualButton = screen.getByRole('button', { name: /start manual tracking/i })
+        await user.click(manualButton)
+
+        // Now the normal nav should be visible
+        expect(screen.getByRole('navigation')).toBeInTheDocument()
 
         // Click on Teams navigation
         const teamsNav = screen.getByRole('button', { name: /teams/i })

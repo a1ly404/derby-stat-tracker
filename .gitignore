@@ -1,36 +1,117 @@
-# Logs
-logs
-*.log
+# ============================================================
+# Derby Stat Tracker — Monorepo .gitignore
+# ============================================================
+
+# ── Node ────────────────────────────────────────────────────
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ── Build outputs ───────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+.output/
 
-# Editor directories and files
+# ── TypeScript ──────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Environment variables (NEVER commit secrets) ────────────
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Allow example env files
+!.env.example
+!**/.env.example
+
+# ── Test & coverage ─────────────────────────────────────────
+coverage/
+!coverage/.tmp
+.nyc_output/
+
+# ── Playwright ──────────────────────────────────────────────
+e2e/test-results/
+e2e/playwright-report/
+e2e/blob-report/
+e2e/.playwright/
+
+# ── Lighthouse CI ───────────────────────────────────────────
+.lighthouseci/
+.lighthouseci-local/
+
+# ── Python (scoreboard-api) ─────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+.eggs/
+pip-wheel-metadata/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# ── Editor & OS ─────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-.env
-*.tsbuildinfo
-coverage/*
-!coverage/.tmp
+*.swp
+*.swo
 
-# Lighthouse CI output directories
-.lighthouseci/
-.lighthouseci-local/
+# ── Logs ────────────────────────────────────────────────────
+logs/
+*.log
+*.local
 
-# Debug files
+# ── Vercel ──────────────────────────────────────────────────
+.vercel/
+
+# ── Docker ──────────────────────────────────────────────────
+.docker/
+
+# ── Misc ────────────────────────────────────────────────────
+*.local
+.cache/
+tmp/
+temp/
 *debug*.png
 *debug*.cjs

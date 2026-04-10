@@ -1,176 +1,278 @@
-# Derby Stat Tracker
+# Derby Stat Tracker — Monorepo
 
-A modern web application for tracking roller derby statistics, built with React, TypeScript, Vite, and Supabase.
+A roller derby statistics platform with two modes: **manual stat tracking** during a bout, and **live scoreboard integration** via the CRG ScoreBoard software.
 
-## Features
+---
 
-- **Player Management**: Track players, their derby names, numbers, and positions
-- **Team Organization**: Manage multiple teams and their rosters
-- **Bout Tracking**: Record and monitor derby bouts/games
-- **Real-time Statistics**: Track detailed player performance metrics
-- **User Authentication**: Secure login and user management with Supabase
-- **Responsive Design**: Works on desktop and mobile devices
+## Repository Structure
 
-## Tech Stack
-
-- **Frontend**: React 18 with TypeScript
-- **Build Tool**: Vite (fast development and building)
-- **Backend**: Supabase (PostgreSQL database, authentication, real-time)
-- **Styling**: CSS with modern layouts and responsive design
-- **Deployment**: Ready for Vercel deployment
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- A Supabase account and project
-
-### Setup Instructions
-
-1. **Clone the repository**
-
-    ```bash
-    git clone https://github.com/a1ly404/derby-stat-tracker.git
-    cd derby-stat-tracker
-    ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up Supabase**
-   - Create a new project at [supabase.com](https://supabase.com)
-   - Go to Settings > API to get your project URL and anon key
-   - Run the SQL schema from `database/schema.sql` in your Supabase SQL editor
-
-4. **Configure environment variables**
-   - Copy `.env.example` to `.env.local` and update with your Supabase credentials:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Then edit `.env.local` with your actual values:
-
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-5. **Run the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-   - Navigate to `http://localhost:5174`
-   - Create an account or sign in to start tracking derby stats!
-
-## Database Schema
-
-The application uses the following main tables:
-
-- **teams**: Store team information
-- **players**: Player details with team associations
-- **bouts**: Derby game/match records
-- **player_stats**: Detailed performance statistics per player per bout
-
-See `database/schema.sql` for the complete database structure.
-
-## Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint for code quality
-
-### Project Structure
-
-```text
-src/
-├── components/          # React components
-├── hooks/              # Custom React hooks
-├── lib/                # Utilities and configurations
-├── contexts/           # React contexts (if needed)
-└── assets/             # Static assets
 ```
+derby-stat-tracker/
+├── apps/
+│   └── web/                      # React + Vite web application (deployed to Vercel)
+├── packages/
+│   └── live-frontend/            # Live overlay UI components (from spark repo — see note below)
+├── services/
+│   ├── scoreboard-api/           # Python asyncio CRG WebSocket proxy (HTTP API)
+│   └── live-bridge/              # Node.js service: polls scoreboard API → writes to Supabase
+├── database/
+│   ├── schema.sql                # Full initial database schema
+│   ├── migrations/               # Incremental SQL migrations
+│   └── supabase-rls-performance-fixes.sql
+├── e2e/                          # Playwright end-to-end tests
+├── .github/
+│   └── workflows/                # CI/CD pipelines
+└── package.json                  # npm workspaces root
+```
+
+---
+
+## Apps & Services
+
+| Package | Path | Description | Runtime |
+|---|---|---|---|
+| `@derby/web` | `apps/web` | React + Vite web app | Vercel |
+| `@derby/live-frontend` | `packages/live-frontend` | Live overlay UI components | (bundled into web) |
+| `scoreboard-api` | `services/scoreboard-api` | CRG WebSocket → HTTP proxy | Python 3.11+ |
+| `@derby/live-bridge` | `services/live-bridge` | Polls `/live` → Supabase | Node.js 20+ |
+| `@derby/e2e` | `e2e` | Playwright E2E test suite | CI / local |
+
+---
+
+## Architecture Overview
+
+```
+  CRG ScoreBoard (local)
+         │  WebSocket
+         ▼
+  ┌──────────────────┐
+  │  scoreboard-api  │  Python asyncio   port 5001
+  │  GET /live       │◄──────────────────────────────────────┐
+  │  GET /health     │                                        │
+  └────────┬─────────┘                                        │
+           │ HTTP poll                    HTTP poll           │
+           ▼                                  │               │
+  ┌──────────────────┐              ┌─────────┴──────────┐   │
+  │   live-bridge    │              │     apps/web        │   │
+  │  Node.js service │              │  React (Vercel)     │   │
+  │  writes snapshots│              │  Manual tracking    │   │
+  └────────┬─────────┘              │  Live scoreboard UI │   │
+           │ @supabase/supabase-js  └────────────┬────────┘   │
+           ▼                                     │             │
+  ┌──────────────────────────────────────────────▼─────────┐  │
+  │                        Supabase                         │  │
+  │  teams · players · bouts · player_stats                 │  │
+  │  live_games · live_jam_snapshots                        │  │
+  └─────────────────────────────────────────────────────────┘  │
+                                                               │
+  VITE_SCOREBOARD_API_URL ──────────────────────────────────────┘
+```
+
+**Two modes after login:**
+- **📊 Manual Stat Tracking** — track jams, lineups, and scores by hand during a bout; all data saved directly to Supabase from the browser.
+- **📡 Live from Scoreboard** — read live data from CRG via the scoreboard API; the `live-bridge` service captures jam snapshots automatically.
+
+---
+
+## Prerequisites
+
+| Tool | Version |
+|---|---|
+| Node.js | ≥ 20 |
+| npm | ≥ 10 |
+| Python | ≥ 3.11 (for `scoreboard-api`) |
+| Git | any recent version |
+
+---
+
+## Quick Start
+
+### 1. Clone the repo
+
+```sh
+git clone https://github.com/a1ly404/derby-stat-tracker.git
+cd derby-stat-tracker
+```
+
+### 2. Install all Node dependencies (workspaces)
+
+```sh
+npm install
+```
+
+This installs dependencies for `apps/web`, `packages/live-frontend`, `services/live-bridge`, and `e2e` in one command.
+
+### 3. Set up environment variables
+
+**Web app** (`apps/web/.env`):
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SCOREBOARD_API_URL=http://localhost:5001
+```
+
+**Live bridge** (`services/live-bridge/.env`):
+```env
+SCOREBOARD_API_URL=http://localhost:5001
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+POLL_INTERVAL_MS=1000
+```
+
+> ⚠️ Use the **service role key** (not the anon key) for `live-bridge` — it needs to bypass RLS to write snapshots.
+> Never commit `.env` files. `.env.example` files are provided in each package.
+
+### 4. Apply the database schema
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Open the SQL editor
+3. Run `database/schema.sql` (initial tables)
+4. Run `database/migrations/001_live_tables.sql` (live tracking tables)
+
+See [`database/README.md`](database/README.md) and [`database/migrations/README.md`](database/migrations/README.md) for details.
+
+### 5. Set up the scoreboard API (Python)
+
+```sh
+cd services/scoreboard-api
+git clone https://github.com/a1ly404/derby-scoreboard-api .   # first time only
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
+
+The service listens on `http://localhost:5001` by default.
+
+---
+
+## Running the App
+
+From the **monorepo root**:
+
+```sh
+# Start the React web app (http://localhost:5173)
+npm run dev
+
+# Start the live bridge service
+npm run bridge:dev
+
+# Run web app unit tests
+npm run test
+
+# Run unit tests across all workspaces
+npm run test:all
+
+# Run Playwright E2E tests (starts dev server automatically)
+npm run e2e
+
+# Lint all workspaces
+npm run lint
+```
+
+From individual workspaces:
+
+```sh
+# Web app
+cd apps/web && npm run dev
+
+# Live bridge
+cd services/live-bridge && npm run dev
+
+# E2E tests
+cd e2e && npm run test:ui
+```
+
+---
 
 ## Deployment
 
-### Environment Variables for Production
+### Web App — Vercel
 
-⚠️ **Important**: Never commit `.env.local` to your repository! It contains secrets.
+The `apps/web` app is deployed to Vercel.
 
-For production deployment, you need to set these environment variables in your hosting platform:
+**Vercel project settings** (configure in the Vercel dashboard):
+- **Root Directory:** `apps/web`
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Install Command:** `npm ci`
 
-- `VITE_SUPABASE_URL` - Your Supabase project URL
-- `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+Required environment variables in Vercel:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `VITE_SCOREBOARD_API_URL` (set to your publicly accessible scoreboard API URL, or leave empty to prompt users to configure it in the UI)
 
-### Vercel Deployment
+### Live Bridge — Local / Docker
 
-1. **Push your code to GitHub** (without `.env.local`)
+The `live-bridge` service is designed to run **on the same machine as the CRG scoreboard** (or on your local network alongside it):
 
-2. **Connect to Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Import your GitHub repository
+```sh
+cd services/live-bridge
+cp .env.example .env   # fill in values
+npm run build
+npm run start
+```
 
-3. **Add Environment Variables**
-   - In Vercel dashboard: Project Settings > Environment Variables
-   - Add:
+---
 
-     ```env
-     VITE_SUPABASE_URL = your_supabase_project_url
-     VITE_SUPABASE_ANON_KEY = your_supabase_anon_key
-     ```
+## Importing the Spark Frontend (`packages/live-frontend`)
 
-4. **Deploy!** - Vercel will automatically build and deploy
+The `packages/live-frontend` package is a placeholder for the live overlay UI created with GitHub Spark. Once you have access to the spark repo source:
 
-### Netlify Deployment
+1. Copy the source files into `packages/live-frontend/`
+2. Ensure the package exports React components from its `index.ts`
+3. Add `"@derby/live-frontend": "*"` to `apps/web/package.json` dependencies
+4. Run `npm install` from the root to link the workspace package
+5. Import components in `apps/web/src/components/LiveScoreboardView.tsx`
 
-1. **Push to GitHub** (without `.env.local`)
+---
 
-2. **Connect to Netlify**
-   - Go to [netlify.com](https://netlify.com)
-   - Connect your GitHub repository
+## Testing
 
-3. **Add Environment Variables**
-   - In Netlify dashboard: Site Settings > Environment Variables
-   - Add the same variables as above
+| Test suite | Command | Location |
+|---|---|---|
+| Unit + component (Vitest) | `npm run test` | `apps/web/src/**/*.test.*` |
+| Coverage report | `npm run test:coverage` | `apps/web/coverage/` |
+| Scoreboard API (pytest) | `pytest` in `services/scoreboard-api` | `services/scoreboard-api/tests/` |
+| E2E (Playwright) | `npm run e2e` | `e2e/tests/` |
 
-4. **Build Settings**
-   - Build command: `npm run build`
-   - Publish directory: `dist`
+---
 
-### Other Platforms
+## CI/CD
 
-For other hosting platforms (Cloudflare Pages, Firebase, etc.), the process is similar:
+GitHub Actions workflows (`.github/workflows/`):
 
-1. Connect your GitHub repository
-2. Set the environment variables in the platform's dashboard
-3. Configure build command as `npm run build` with output directory `dist`
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `ci.yml` | push/PR to `main`, `dev` | Lint → test → build web app; deploy to Vercel on `main` |
+| `quality-gate.yml` | push/PR | Code quality checks |
+| `lighthouse.yml` | push to `main` | Lighthouse performance audit |
+| `codeql.yml` | scheduled + push | CodeQL security analysis |
+| `test-before-deploy.yml` | push to `main` | Gate: tests must pass before any deploy |
 
-### Error Handling
+---
 
-If environment variables are missing in production, users will see a friendly configuration error page instead of a broken app.
+## Database Schema
+
+See [`database/README.md`](database/README.md) for the full schema reference.
+
+**Core tables:** `teams`, `players`, `player_teams`, `bouts`, `player_stats`
+
+**Live tracking tables** (added by `migrations/001_live_tables.sql`):
+- `live_games` — one row per scoreboard session
+- `live_jam_snapshots` — one row per jam boundary, written by `live-bridge`
+
+---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Create a feature branch from `dev`
+2. Make your changes
+3. Ensure `npm run lint` and `npm run test` pass
+4. Open a PR targeting `dev`
 
-## License
+---
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Licence
 
-## Support
-
-If you have any questions or run into issues, please open an issue on GitHub or contact the development team.
+Private repository — all rights reserved.

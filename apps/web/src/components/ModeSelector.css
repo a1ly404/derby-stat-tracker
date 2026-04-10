@@ -1,0 +1,275 @@
+/* ============================================================
+   ModeSelector — full-page dark mode-selection screen
+   ============================================================ */
+
+.mode-selector-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #0f0f1a 0%, #1a1030 50%, #0d1a2e 100%);
+  color: #f0f0f5;
+}
+
+/* ── Top bar ─────────────────────────────────────────────── */
+.mode-selector-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  flex-shrink: 0;
+}
+
+.mode-selector-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mode-selector-logo {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.mode-selector-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #e8e4ff;
+}
+
+.mode-sign-out-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.mode-sign-out-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+/* ── Body ────────────────────────────────────────────────── */
+.mode-selector-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem 4rem;
+  gap: 3rem;
+}
+
+/* ── Page heading ────────────────────────────────────────── */
+.mode-selector-header {
+  text-align: center;
+}
+
+.mode-selector-heading {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 2px 20px rgba(102, 126, 234, 0.4);
+}
+
+.mode-selector-subheading {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+  margin: 0;
+}
+
+/* ── Cards grid ──────────────────────────────────────────── */
+.mode-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem;
+  width: 100%;
+  max-width: 860px;
+}
+
+/* ── Individual card ─────────────────────────────────────── */
+.mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2.25rem 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+    background 0.2s ease;
+  text-align: center;
+}
+
+.mode-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Manual card accent */
+.mode-card--manual {
+  border-color: rgba(102, 126, 234, 0.35);
+}
+
+.mode-card--manual:hover {
+  border-color: rgba(102, 126, 234, 0.7);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+}
+
+/* Live card accent */
+.mode-card--live {
+  border-color: rgba(0, 210, 180, 0.3);
+}
+
+.mode-card--live:hover {
+  border-color: rgba(0, 210, 180, 0.65);
+  box-shadow: 0 12px 40px rgba(0, 210, 180, 0.2);
+}
+
+/* ── Card icon ───────────────────────────────────────────── */
+.mode-card-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+
+/* ── Card text ───────────────────────────────────────────── */
+.mode-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mode-card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.mode-card-description {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 22ch;
+}
+
+.mode-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+  width: 100%;
+}
+
+.mode-card-features li {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+  padding-left: 1.1em;
+  position: relative;
+}
+
+.mode-card-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Card buttons ────────────────────────────────────────── */
+.mode-card-btn {
+  width: 100%;
+  padding: 0.8rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.mode-card-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.mode-card-btn:active {
+  transform: scale(0.98);
+}
+
+.mode-card-btn--manual {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.mode-card-btn--live {
+  background: linear-gradient(135deg, #00c9a7 0%, #00b4d8 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .mode-selector-topbar {
+    padding: 0.85rem 1.25rem;
+  }
+
+  .mode-selector-body {
+    padding: 2rem 1.25rem 3rem;
+    gap: 2rem;
+  }
+
+  .mode-selector-heading {
+    font-size: 1.9rem;
+  }
+
+  .mode-cards {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+
+  .mode-card {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .mode-card-description {
+    max-width: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .mode-selector-heading {
+    font-size: 1.55rem;
+  }
+
+  .mode-card-icon {
+    font-size: 2.75rem;
+  }
+
+  .mode-card-title {
+    font-size: 1.15rem;
+  }
+}
