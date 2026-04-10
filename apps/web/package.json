@@ -15,11 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "test:ci": "node scripts/test-ci-local.js",
     "pre-push": "npm run lint",
-    "preview": "vite preview",
-    "lighthouse": "lhci autorun --config=lighthouse/lighthouserc.cjs",
-    "lighthouse:local": "node lighthouse/run-lighthouse-localhost.js",
-    "lighthouse:prod": "echo 'Testing production site with authentication' && lhci autorun --config=lighthouse/lighthouserc.cjs",
-    "lighthouse:test": "node lighthouse/run-lighthouse-local.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -44,7 +40,6 @@
     "globals": "^15.9.0",
     "happy-dom": "^18.0.1",
     "jsdom": "^27.0.0",
-    "puppeteer": "^23.11.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^7.2.6",
