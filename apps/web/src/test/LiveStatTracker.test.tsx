@@ -31,10 +31,9 @@ vi.mock('../components/LiveBoutHeader', () => ({
 }))
 
 vi.mock('../components/JamTracker', () => ({
-  default: ({ currentJamNumber, isJamActive, currentLineup, onUpdateCurrentLineup, homeTeamPlayers, awayTeamPlayers }: {
+  default: ({ currentJamNumber, isJamActive, onUpdateCurrentLineup, homeTeamPlayers, awayTeamPlayers }: {
     currentJamNumber: number
     isJamActive: boolean
-    currentLineup: { homeJammer: unknown; awayJammer: unknown }
     onUpdateCurrentLineup: (lineup: unknown) => void
     homeTeamPlayers: Array<{ id: string; derby_name: string; team_number: string; preferred_number: string; position: string }>
     awayTeamPlayers: Array<{ id: string; derby_name: string; team_number: string; preferred_number: string; position: string }>

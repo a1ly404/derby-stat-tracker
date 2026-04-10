@@ -35,10 +35,17 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.12.x
 
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+        id: setup-chrome
+
       - name: Run Lighthouse CI
         run: lhci autorun --config=lighthouse/lighthouserc.cjs
         working-directory: apps/web
         env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
           # Ensure GitHub token is available for status checks
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
           # Authentication credentials for Puppeteer
