@@ -25,10 +25,7 @@ export default defineConfig({
   // ── Timeouts ─────────────────────────────────────────────────────────────
   /** Max time one test can run before it is considered failed */
   timeout: 30_000,
-  expect: {
-    /** Max time expect() auto-retries before failing */
-    timeout: 5_000,
-  },
+
 
   // ── Parallelism & retries ─────────────────────────────────────────────────
   fullyParallel: true,
@@ -57,14 +54,31 @@ export default defineConfig({
      */
     baseURL: process.env.BASE_URL ?? 'http://localhost:5173',
 
-    /** Capture a screenshot automatically on test failure */
-    screenshot: 'only-on-failure',
+    /** Capture a screenshot on every test so we have a visual record */
+    screenshot: 'on',
 
-    /** Record video only when a test is retried (keeps storage reasonable) */
-    video: 'on-first-retry',
+    /**
+     * Record video on failure + first retry. Set to 'on' locally if you want
+     * full video coverage (larger artifacts).
+     */
+    video: 'retain-on-failure',
 
     /** Collect a Playwright trace on first retry for easier debugging */
     trace: 'on-first-retry',
+  },
+
+  /**
+   * Visual regression settings for toHaveScreenshot().
+   * Baselines live in e2e/tests/<spec>.spec.ts-snapshots/.
+   */
+  snapshotPathTemplate:
+    '{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}{ext}',
+  expect: {
+    timeout: 5_000,
+    toHaveScreenshot: {
+      /** Allow up to 1% pixel diff to absorb font-rendering jitter across OS / CI */
+      maxDiffPixelRatio: 0.01,
+    },
   },
 
   // ── Browser projects ──────────────────────────────────────────────────────
