@@ -1,0 +1,13 @@
+{
+  "folders": [
+    "derby-stat-tracker",
+    "derby-scoreboard-api",
+    "derby-scoreboard-display",
+    "scoreboard",
+    "mempalace"
+  ],
+  "settings": {
+    "preferred_startup_url": "http://localhost:5175/"
+  },
+  "notes": "Open all folders in a single Zed workspace for persistent assistant context. Add mempalace to workspace to provide derby/CONTEXT.md to assistant threads."
+}
